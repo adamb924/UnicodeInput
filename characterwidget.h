@@ -6,7 +6,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QString>
-#include <QWidget>
+#include <QtWidgets/QWidget>
 #include <QVector>
 
 class QMouseEvent;

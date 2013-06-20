@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtGui/QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <QSqlDatabase>
 
 QT_BEGIN_NAMESPACE

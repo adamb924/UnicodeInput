@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
-#include <QtGui>
+
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -44,7 +45,7 @@ MainWindow::MainWindow()
     q.next();
     if(q.value(0).toInt()<21742)
     {
-	QMessageBox::information (this,"Error Message","There was a problem in reading names.db. The ability to look up glyph names will either be impaired or completely unavailable." );
+        QMessageBox::information (this,"Error Message","There was a problem in reading names.db. The ability to look up glyph names will either be impaired or completely unavailable." );
     }
 
     QWidget *widget = new QWidget;
