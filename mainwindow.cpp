@@ -28,17 +28,17 @@ MainWindow::MainWindow()
 
     if(!QSqlDatabase::isDriverAvailable("QSQLITE"))
     {
-	QMessageBox::critical (0,"Fatal error", "The driver for the database is not available. It is unlikely that you will solve this on your own. Rather you had better contact the developer.");
-	unrecoverableError=1;
-	return;
+        QMessageBox::critical (0,"Fatal error", "The driver for the database is not available. It is unlikely that you will solve this on your own. Rather you had better contact the developer.");
+        unrecoverableError=1;
+        return;
     }
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("names.db");
     if(!db.open())
     {
-	    QMessageBox::information (this,"Error Message","There was a problem in opening the database. The program said: " + db.lastError().databaseText() + " It is unlikely that you will solve this on your own. Rather you had better contact the developer." );
-	    unrecoverableError=1;
-	    return;
+        QMessageBox::information (this,"Error Message","There was a problem in opening the database. The program said: " + db.lastError().databaseText() + " It is unlikely that you will solve this on your own. Rather you had better contact the developer." );
+        unrecoverableError=1;
+        return;
     }
     QSqlQuery q;
     q.exec("select count(*) from names;");
@@ -103,7 +103,7 @@ MainWindow::MainWindow()
     bottomLayout->addLayout(enterHexLayout);
     bottomLayout->addLayout(enterGlyphNameLayout);
 
-//    cw->updateFont(QFont("Unicode BMP Fallback SIL"));
+    //    cw->updateFont(QFont("Unicode BMP Fallback SIL"));
     cw->updateFont(QFont());
 
     mainLayout->addLayout(topLayout,0);
@@ -145,7 +145,7 @@ MainWindow::MainWindow()
     connect(numberToReturn, SIGNAL(textEdited(const QString &)), this, SLOT(searchGlyphName()));
     connect(substringSearch, SIGNAL(clicked(bool)), this, SLOT(searchGlyphName()));
     connect(top,SIGNAL(cursorPositionChanged(int,int)),cw,SLOT(cursorPosition(int,int)));
-//    connect(top,SIGNAL(cursorPositionChanged(int,int)),cw,SLOT(repaint()));
+    //    connect(top,SIGNAL(cursorPositionChanged(int,int)),cw,SLOT(repaint()));
     connect(sortByCodepoint, SIGNAL(clicked()), this, SLOT(searchGlyphName()));
 }
 
@@ -166,10 +166,10 @@ void MainWindow::appendCodepoint(quint32 codepoint)
     array = top->text().toUcs4();
     array.insert(pos,codepoint);
     top->setText(top->text().fromUcs4((quint32*)array.data(),array.size()));
-/*
+    /*
     int positionIncrement = 1;
     if( codepoint > 0xffff )
-	positionIncrement++;
+    positionIncrement++;
     top->setCursorPosition(pos+positionIncrement);
 */
     top->setCursorPosition(pos+1);
@@ -196,7 +196,7 @@ QString MainWindow::nameFromCodepoint(quint32 character)
     QSqlQuery query(db);
     query.exec("select name from names where codepoint='"+ unicode +"';");
     if(query.next())
-	name = query.value(0).toString();
+        name = query.value(0).toString();
 
     return name;
 }
@@ -224,21 +224,21 @@ void MainWindow::searchGlyphName()
 
     QString order("name");
     if( sortByCodepoint->isChecked() )
-	order = "length(codepoint),codepoint";
+        order = "length(codepoint),codepoint";
 
     QSqlQuery query(db);
     query.exec("select name,codepoint from names where substr(name,1," + QString::number(searchString.length()) + ")='" + searchString  + "' order by "+order+";");
     while(query.next())
     {
-	nameList->addItem(query.value(0).toString() + " (U+" + query.value(1).toString() + ")");
+        nameList->addItem(query.value(0).toString() + " (U+" + query.value(1).toString() + ")");
     }
 
     if(substringSearch->isChecked() && searchString.length()>1)
     {
-	query.exec("select name,codepoint from names where name like '%_" + searchString  + "%' order by "+order+" limit " + maxcount + " ;");
+        query.exec("select name,codepoint from names where name like '%_" + searchString  + "%' order by "+order+" limit " + maxcount + " ;");
 
-	while(query.next())
-	    nameList->addItem(query.value(0).toString() + " (U+" + query.value(1).toString() + ")");
+        while(query.next())
+            nameList->addItem(query.value(0).toString() + " (U+" + query.value(1).toString() + ")");
     }
 
     nameList->verticalScrollBar()->setSliderPosition(0);
@@ -247,9 +247,9 @@ void MainWindow::searchGlyphName()
 void MainWindow::addFirstReturnedResult()
 {
     if(nameList->count() < 1)
-	return;
+        return;
     else
-	glyphNameDoubleClicked(nameList->item(0));
+        glyphNameDoubleClicked(nameList->item(0));
 
 }
 
@@ -258,17 +258,15 @@ void MainWindow::textentrySelectionChanged()
     cw->updateHasSelection(top->hasSelectedText());
     if( top->hasSelectedText() )
     {
-	int length = top->selectedText().length();
+        int length = top->selectedText().length();
 
-	// oddly, characters greater than 0xffff are counted as two
-	QVector<quint32> array = top->selectedText().toUcs4();
-	for(int i=0; i<array.count(); i++)
-	    if( array[i] > 0xffff )
-		length--;
+        // oddly, characters greater than 0xffff are counted as two
+        QVector<quint32> array = top->selectedText().toUcs4();
+        for(int i=0; i<array.count(); i++)
+            if( array[i] > 0xffff )
+                length--;
 
-//	qDebug() << top->selectionStart() << top->selectedText().length() << length;
-
-	cw->updateSelection(top->selectionStart(), length );
+        cw->updateSelection(top->selectionStart(), length );
     }
 }
 
