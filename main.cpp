@@ -5,11 +5,10 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
-    if(!w.unrecoverableError)
+    if(!w.databaseError())
     {
-	w.show();
-	return a.exec();
+        w.show();
+        return a.exec();
     }
-
     return 1;
 }

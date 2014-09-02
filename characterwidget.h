@@ -38,7 +38,7 @@ protected:
     QList<QRect> aRects;
 
 private:
-//    QString theString;
+    qreal mScreenScale;
     QVector<quint32> theString;
     bool hasSelection;
     QFont displayFont;

@@ -24,22 +24,26 @@ QT_END_NAMESPACE
 
 #include "characterwidget.h"
 
+namespace Ui {
+    class MainWindow;
+}
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
-    QLineEdit *top, *hex, *glyphName;
-    CharacterWidget *cw;
+private:
+    CharacterWidget *characterWidget;
     QListWidget *nameList;
     QSqlDatabase db;
 
-    QCheckBox *substringSearch;
-    QLineEdit *numberToReturn;
-    QLabel *glyphNameLabel;
     QCheckBox *sortByCodepoint;
 
-public:
-    bool unrecoverableError;
+    Ui::MainWindow *ui;
+
+    bool mbDatabaseError;
+
+    void setupDatabase();
+    void createDock();
 
 private slots:
     void searchGlyphName();
@@ -53,8 +57,10 @@ private slots:
     void textentrySelectionChanged();
 
 public:
-    MainWindow();
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    bool databaseError() const;
 
     QString nameFromCodepoint(quint32 character);
 

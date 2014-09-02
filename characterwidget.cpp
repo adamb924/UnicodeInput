@@ -11,14 +11,17 @@ CharacterWidget::CharacterWidget(QWidget *parent)
     squareHeight = 30;
     squareWidth = 22;
 
+    mScreenScale = QGuiApplication::primaryScreen()->logicalDotsPerInch() / 120.0;
+
     topTextMargin = 2;
     bottomTextMargin = 4;
     leftTextMargin = 3;
     rightmargin = 5;
-
     rectPadding = 4;
 
-    this->setMinimumHeight(squareHeight+topTextMargin+bottomTextMargin);
+    updateFont(QFont()); // default initialization
+
+    setSizePolicy( QSizePolicy::Maximum , QSizePolicy::Fixed );
 }
 
 void CharacterWidget::updateFont(const QFont &font)
@@ -31,7 +34,7 @@ void CharacterWidget::updateFont(const QFont &font)
 
 QSize CharacterWidget::sizeHint() const
 {
-    return QSize(1000, topTextMargin + squareHeight + bottomTextMargin);
+    return QSize(1000, mScreenScale * ( topTextMargin + squareHeight + bottomTextMargin ) );
 }
 
 void CharacterWidget::updateText(QString str)
@@ -45,6 +48,11 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
 {
     // set up the environment
     QPainter painter(this);
+
+    QTransform transform;
+    transform.scale( mScreenScale, mScreenScale );
+    painter.setWorldTransform(transform, false);
+
     painter.fillRect(event->rect(), QBrush(Qt::white));
     painter.setFont(displayFont);
 
@@ -124,6 +132,8 @@ QFont CharacterWidget::font()
 
 void CharacterWidget::cursorPosition(int old, int newpos)
 {
+    Q_UNUSED(old);
+
     cursor = newpos;
 
     // oddly, characters greater than 0xffff are counted as two

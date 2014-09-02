@@ -9,3 +9,6 @@ SOURCES += main.cpp \
     characterwidget.cpp
 HEADERS += mainwindow.h \
     characterwidget.h
+
+FORMS += \
+    mainwindow.ui
