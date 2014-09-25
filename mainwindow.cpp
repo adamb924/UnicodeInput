@@ -18,6 +18,7 @@
 #include <QScrollBar>
 #include <QApplication>
 #include <stdio.h>
+#include <QDir>
 
 #include <QtDebug>
 
@@ -119,7 +120,7 @@ void MainWindow::setupDatabase()
     mbDatabaseError=0;
     if(!QSqlDatabase::isDriverAvailable("QSQLITE"))
     {
-        QMessageBox::critical (0,"Fatal error", "The driver for the database is not available. It is unlikely that you will solve this on your own. Rather you had better contact the developer.");
+        QMessageBox::critical (0,tr("Fatal error"), tr("The driver for the database is not available. This can happen if the file sqldrivers/qsqlite.dll cannot be found."));
         mbDatabaseError=1;
         return;
     }
@@ -127,7 +128,7 @@ void MainWindow::setupDatabase()
     db.setDatabaseName("names.db");
     if(!db.open())
     {
-        QMessageBox::information (this,"Error Message","There was a problem in opening the database. The program said: " + db.lastError().databaseText() + " It is unlikely that you will solve this on your own. Rather you had better contact the developer." );
+        QMessageBox::information (this,tr("Error Message"),tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(db.lastError().databaseText()) );
         mbDatabaseError=1;
         return;
     }
@@ -136,7 +137,7 @@ void MainWindow::setupDatabase()
     q.next();
     if(q.value(0).toInt()<21742)
     {
-        QMessageBox::information (this,"Error Message","There was a problem in reading names.db. The ability to look up glyph names will either be impaired or completely unavailable." );
+        QMessageBox::information (this,tr("Error Message"),tr("There was a problem in reading names.db (I was looking for %1). The ability to look up glyph names will either be impaired or completely unavailable.").arg(QDir::current().filePath("names.db")) );
     }
 }
 
