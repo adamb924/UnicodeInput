@@ -1,7 +1,6 @@
 #ifndef CHARACTERWIDGET_H
 #define CHARACTERWIDGET_H
 
-
 #include <QFont>
 #include <QPoint>
 #include <QSize>
@@ -12,13 +11,16 @@
 class QMouseEvent;
 class QPaintEvent;
 class MainWindow;
+class DatabaseAdapter;
 
 class CharacterWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    CharacterWidget(QWidget *parent = 0);
+    explicit CharacterWidget(QWidget *parent = 0);
+    void setDbAdapter(const DatabaseAdapter * db);
+
     QSize sizeHint() const;
     QFont font();
 
@@ -33,7 +35,7 @@ signals:
 
 protected:
     void paintEvent(QPaintEvent *event);
-    MainWindow *mwParent;
+    const DatabaseAdapter * mDbAdapter;
 
     QList<QRect> aRects;
 

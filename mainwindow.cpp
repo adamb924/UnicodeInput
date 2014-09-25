@@ -1,24 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QLabel>
-#include <QFontDialog>
-#include <QMessageBox>
-#include <QRegExpValidator>
-#include <QDockWidget>
-#include <QListWidget>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QCheckBox>
-#include <QScrollBar>
+#include "databaseadapter.h"
+#include "characterwidget.h"
+
 #include <QApplication>
-#include <stdio.h>
-#include <QDir>
+
+#include <QListWidget>
+#include <QFontDialog>
+#include <QDockWidget>
+#include <QScrollBar>
 
 #include <QtDebug>
 
@@ -28,7 +19,9 @@ MainWindow::MainWindow(QWidget *parent):
 {
     ui->setupUi(this);
 
-    setupDatabase();
+    mDbAdapter = new DatabaseAdapter;
+    ui->characterWidget->setDbAdapter(mDbAdapter);
+
     createDock();
 
     QRegExpValidator *hexval = new QRegExpValidator(QRegExp("[1234567890abcdefABCDEF]*"),this);
@@ -44,11 +37,11 @@ MainWindow::MainWindow(QWidget *parent):
     connect(ui->glyphName, SIGNAL(textEdited(const QString &)), this, SLOT(searchGlyphName()));
     connect(ui->glyphName,SIGNAL(returnPressed()),this,SLOT(addFirstReturnedResult()));
     connect(ui->substringSearch, SIGNAL(clicked(bool)), ui->numberToReturn, SLOT(setEnabled(bool)));
-    connect(nameList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(glyphNameDoubleClicked(QListWidgetItem*)));
+    connect(mNameList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(glyphNameDoubleClicked(QListWidgetItem*)));
     connect(ui->numberToReturn, SIGNAL(textEdited(const QString &)), this, SLOT(searchGlyphName()));
     connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(searchGlyphName()));
     connect(ui->textEntry,SIGNAL(cursorPositionChanged(int,int)),ui->characterWidget,SLOT(cursorPosition(int,int)));
-    connect(sortByCodepoint, SIGNAL(clicked()), this, SLOT(searchGlyphName()));
+    connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(searchGlyphName()));
 
     setFixedHeight(sizeHint().height());
 }
@@ -60,7 +53,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::databaseError() const
 {
-    return mbDatabaseError;
+    return mDbAdapter->databaseError();
 }
 
 void MainWindow::changeTopFont()
@@ -78,30 +71,11 @@ void MainWindow::appendCodepoint(quint32 codepoint)
     ui->textEntry->setCursorPosition(pos+1);
 }
 
-quint32 MainWindow::uintFromHexCodepoint(QString codepoint)
-{
-    bool ok;
-    return codepoint.toUInt(&ok,16);
-}
-
 void MainWindow::hexEntered()
 {
-    quint32 character = uintFromHexCodepoint(ui->hex->text());
-    ui->glyphNameLabel->setText( nameFromCodepoint(character) );
+    quint32 character = DatabaseAdapter::uintFromHexCodepoint(ui->hex->text());
+    ui->glyphNameLabel->setText( mDbAdapter->nameFromCodepoint(character) );
     appendCodepoint(character);
-}
-
-QString MainWindow::nameFromCodepoint(quint32 character)
-{
-    QString unicode = QString("%1").arg(character,4,16,QLatin1Char('0')).toUpper();
-
-    QString name="Codepoint not found in database!";
-    QSqlQuery query(db);
-    query.exec("select name from names where codepoint='"+ unicode +"';");
-    if(query.next())
-        name = query.value(0).toString();
-
-    return name;
 }
 
 
@@ -112,33 +86,7 @@ void MainWindow::glyphNameDoubleClicked(QListWidgetItem *item)
     name.replace(QRegExp("^.*\\+"),"");
     name.replace(")","");
 
-    appendCodepoint(uintFromHexCodepoint(name));
-}
-
-void MainWindow::setupDatabase()
-{
-    mbDatabaseError=0;
-    if(!QSqlDatabase::isDriverAvailable("QSQLITE"))
-    {
-        QMessageBox::critical (0,tr("Fatal error"), tr("The driver for the database is not available. This can happen if the file sqldrivers/qsqlite.dll cannot be found."));
-        mbDatabaseError=1;
-        return;
-    }
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("names.db");
-    if(!db.open())
-    {
-        QMessageBox::information (this,tr("Error Message"),tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(db.lastError().databaseText()) );
-        mbDatabaseError=1;
-        return;
-    }
-    QSqlQuery q;
-    q.exec("select count(*) from names;");
-    q.next();
-    if(q.value(0).toInt()<21742)
-    {
-        QMessageBox::information (this,tr("Error Message"),tr("There was a problem in reading names.db (I was looking for %1). The ability to look up glyph names will either be impaired or completely unavailable.").arg(QDir::current().filePath("names.db")) );
-    }
+    appendCodepoint(DatabaseAdapter::uintFromHexCodepoint(name));
 }
 
 void MainWindow::createDock()
@@ -147,12 +95,12 @@ void MainWindow::createDock()
     QDockWidget *cpDock = new QDockWidget("Codepoint Names",this);
     cpDock->setFeatures(QDockWidget::AllDockWidgetFeatures);
     QWidget *cpWidget = new QWidget(this);
-    nameList = new QListWidget;
-    sortByCodepoint = new QCheckBox(tr("Sort by codepoint order"));
-    sortByCodepoint->setChecked(true);
+    mNameList = new QListWidget;
+    mSortByCodepoint = new QCheckBox(tr("Sort by codepoint order"));
+    mSortByCodepoint->setChecked(true);
     QVBoxLayout  *cpLayout = new QVBoxLayout;
-    cpLayout->addWidget(nameList);
-    cpLayout->addWidget(sortByCodepoint);
+    cpLayout->addWidget(mNameList);
+    cpLayout->addWidget(mSortByCodepoint);
 
     cpWidget->setLayout(cpLayout);
 
@@ -164,42 +112,17 @@ void MainWindow::createDock()
 
 void MainWindow::searchGlyphName()
 {
-    nameList->clear();
-
-    QString maxcount;
-    maxcount = ui->numberToReturn->text();
-
-    QString searchString = ui->glyphName->text().toUpper();
-    if(!searchString.length()) { return; }
-
-    QString order("name");
-    if( sortByCodepoint->isChecked() )
-        order = "length(codepoint),codepoint";
-
-    QSqlQuery query(db);
-    query.exec("select name,codepoint from names where substr(name,1," + QString::number(searchString.length()) + ")='" + searchString  + "' order by "+order+";");
-    while(query.next())
-    {
-        nameList->addItem(query.value(0).toString() + " (U+" + query.value(1).toString() + ")");
-    }
-
-    if(ui->substringSearch->isChecked() && searchString.length()>1)
-    {
-        query.exec("select name,codepoint from names where name like '%_" + searchString  + "%' order by "+order+" limit " + maxcount + " ;");
-
-        while(query.next())
-            nameList->addItem(query.value(0).toString() + " (U+" + query.value(1).toString() + ")");
-    }
-
-    nameList->verticalScrollBar()->setSliderPosition(0);
+    mNameList->clear();
+    mNameList->addItems( mDbAdapter->searchGlyphName( ui->glyphName->text().toUpper(), ui->numberToReturn->text().toInt() , ui->substringSearch->isChecked(), mSortByCodepoint->isChecked() ) );
+    mNameList->verticalScrollBar()->setSliderPosition(0);
 }
 
 void MainWindow::addFirstReturnedResult()
 {
-    if(nameList->count() < 1)
+    if(mNameList->count() < 1)
         return;
     else
-        glyphNameDoubleClicked(nameList->item(0));
+        glyphNameDoubleClicked(mNameList->item(0));
 
 }
 

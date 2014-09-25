@@ -6,9 +6,11 @@ TARGET = UnicodeInput
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
-    characterwidget.cpp
+    characterwidget.cpp \
+    databaseadapter.cpp
 HEADERS += mainwindow.h \
-    characterwidget.h
+    characterwidget.h \
+    databaseadapter.h
 
 FORMS += \
     mainwindow.ui

@@ -1,13 +1,12 @@
 #include <QtWidgets>
 
 #include "characterwidget.h"
-#include "mainwindow.h"
+#include "databaseadapter.h"
 
 CharacterWidget::CharacterWidget(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+      mDbAdapter(0)
 {
-    mwParent = qobject_cast<MainWindow*>(parent);
-
     squareHeight = 30;
     squareWidth = 22;
 
@@ -22,6 +21,11 @@ CharacterWidget::CharacterWidget(QWidget *parent)
     updateFont(QFont()); // default initialization
 
     setSizePolicy( QSizePolicy::Maximum , QSizePolicy::Fixed );
+}
+
+void CharacterWidget::setDbAdapter(const DatabaseAdapter *db)
+{
+    mDbAdapter = db;
 }
 
 void CharacterWidget::updateFont(const QFont &font)
@@ -156,7 +160,7 @@ bool CharacterWidget::event(QEvent *event)
         int index = whichGlyph(helpEvent->pos());
         if (index != -1)
         {
-            QToolTip::showText(helpEvent->globalPos(), mwParent->nameFromCodepoint( theString[index] ) );
+            QToolTip::showText(helpEvent->globalPos(), mDbAdapter->nameFromCodepoint( theString[index] ) );
         }
         else
         {
