@@ -30,7 +30,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLineEdit" name="textEntry">
+       <widget class="WorkaroundLineEdit" name="textEntry">
         <property name="font">
          <font>
           <family>Times New Roman</family>
@@ -185,6 +185,11 @@
    <extends>QWidget</extends>
    <header>characterwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WorkaroundLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>workaroundlineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
