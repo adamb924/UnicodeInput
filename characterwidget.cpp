@@ -20,7 +20,7 @@ CharacterWidget::CharacterWidget(QWidget *parent)
 
     updateFont(QFont()); // default initialization
 
-    setSizePolicy( QSizePolicy::Maximum , QSizePolicy::Fixed );
+    setSizePolicy( QSizePolicy::Maximum , QSizePolicy::Minimum );
 }
 
 void CharacterWidget::setDbAdapter(const DatabaseAdapter *db)
@@ -38,7 +38,8 @@ void CharacterWidget::updateFont(const QFont &font)
 
 QSize CharacterWidget::sizeHint() const
 {
-    return QSize(1000, mScreenScale * ( topTextMargin + squareHeight + bottomTextMargin ) );
+    return QSize(1000, topTextMargin + squareHeight + bottomTextMargin );
+//    return QSize(1000, mScreenScale * ( topTextMargin + squareHeight + bottomTextMargin ) );
 }
 
 void CharacterWidget::updateText(QString str)
