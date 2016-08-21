@@ -1,5 +1,7 @@
 #include <QtWidgets>
 
+#include <QtDebug>
+
 #include "characterwidget.h"
 #include "databaseadapter.h"
 
@@ -36,6 +38,12 @@ void CharacterWidget::updateFont(const QFont &font)
     update();
 }
 
+void CharacterWidget::updateCharacterDisplayFont(const QFont &font)
+{
+    characterDisplayFont = font;
+    update();
+}
+
 QSize CharacterWidget::sizeHint() const
 {
     return QSize(1000, topTextMargin + squareHeight + bottomTextMargin );
@@ -54,7 +62,7 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
     // set up the environment
     QPainter painter(this);
 
-    QTransform transform;
+    transform = QTransform();
     transform.scale( mScreenScale, mScreenScale );
     painter.setWorldTransform(transform, false);
 
@@ -63,7 +71,7 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
 
     quint32 key, cursorx;
     QFontMetrics fontMetrics(displayFont);
-    painter.setPen(QPen(Qt::black));
+    QFontMetrics topFontFM(characterDisplayFont);
 
     // clear the memory of rects
     aRects.clear();
@@ -71,6 +79,15 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
     for (int i=0; i < theString.count(); i++)
     {
         key = theString[i];
+
+        if( topFontFM.inFont( theString[i] ) )
+        {
+            painter.setPen(QPen(Qt::black));
+        }
+        else
+        {
+            painter.setPen(QPen(Qt::red));
+        }
 
         // temporary square width variable
         int sw = squareWidth;
@@ -96,13 +113,16 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
 
         painter.setClipRect(event->rect());
 
-        int leftside = leftTextMargin; // the left position is the leftTextMargin
+        int leftside;
         if(aRects.length() > 0) // or the edge of the last rect, plus a margin
-            leftside = aRects.last().right() + rightmargin;
+            leftside = aRects.last().x() + aRects.last().width() + rightmargin;
+        else
+            leftside = leftTextMargin; // the left position is the leftTextMargin
 
         aRects << QRect( leftside , topTextMargin, sw, squareHeight);
 
         painter.drawRect(aRects.last());
+//        painter.fillRect(aRects.last(), Qt::yellow);
         painter.drawText( aRects.last().left() + rectPadding ,
                           fontMetrics.height() - 2,
                           lowerline);
@@ -158,7 +178,7 @@ bool CharacterWidget::event(QEvent *event)
 {
     if (event->type() == QEvent::ToolTip) {
         QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
-        int index = whichGlyph(helpEvent->pos());
+        int index = whichGlyph( transform.inverted().map( helpEvent->pos() ) );
         if (index != -1)
         {
             QToolTip::showText(helpEvent->globalPos(), mDbAdapter->nameFromCodepoint( theString[index] ) );

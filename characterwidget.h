@@ -26,6 +26,7 @@ public:
 
 public slots:
     void updateFont(const QFont &font);
+    void updateCharacterDisplayFont(const QFont &font);
     void cursorPosition(int old, int newpos);
     void updateSelection(int left,int length);
     void updateHasSelection(bool hasSelection);
@@ -37,13 +38,14 @@ protected:
     void paintEvent(QPaintEvent *event);
     const DatabaseAdapter * mDbAdapter;
 
+    QTransform transform;
     QList<QRect> aRects;
 
 private:
     qreal mScreenScale;
     QVector<quint32> theString;
     bool hasSelection;
-    QFont displayFont;
+    QFont displayFont, characterDisplayFont;
     int squareWidth, squareHeight;
     int selectionLeft, selectionLength;
 

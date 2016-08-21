@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent):
     QValidator *validator = new QIntValidator(1, 100000, this);
     ui->numberToReturn->setValidator(validator);
 
+    ui->characterWidget->updateCharacterDisplayFont( ui->textEntry->font() );
+
     connect(ui->textEntry,SIGNAL(selectionChanged()),this,SLOT(textentrySelectionChanged()));
     connect(ui->textEntry,SIGNAL(textChanged(QString)),ui->characterWidget,SLOT(updateText(QString)));
     connect(ui->changeFont,SIGNAL(clicked(bool)),this,SLOT(changeTopFont()));
@@ -58,7 +60,9 @@ bool MainWindow::databaseError() const
 
 void MainWindow::changeTopFont()
 {
-    ui->textEntry->setFont(QFontDialog::getFont(0, ui->textEntry->font()));
+    QFont newFont = QFontDialog::getFont(0, ui->textEntry->font());
+    ui->textEntry->setFont(newFont);
+    ui->characterWidget->updateCharacterDisplayFont( newFont );
 }
 
 void MainWindow::appendCodepoint(quint32 codepoint)
