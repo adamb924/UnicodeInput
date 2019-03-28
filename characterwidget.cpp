@@ -150,6 +150,15 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
     }
 }
 
+void CharacterWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    int index = whichGlyph( transform.inverted().map( event->pos() ) );
+    if (index != -1)
+    {
+        emit characterDoubleClicked(theString[index]);
+    }
+}
+
 QFont CharacterWidget::font()
 {
     return displayFont;

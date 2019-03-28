@@ -30,6 +30,7 @@ private slots:
     void glyphNameDoubleClicked(QListWidgetItem *item);
     void appendCodepoint(quint32 codepoint);
     void addFirstReturnedResult();
+    void fillInGlyphName(quint32 codepoint);
 
     void textentrySelectionChanged();
 

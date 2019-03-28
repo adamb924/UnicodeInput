@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent):
     connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(searchGlyphName()));
     connect(ui->textEntry,SIGNAL(cursorPositionChanged(int,int)),ui->characterWidget,SLOT(cursorPosition(int,int)));
     connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(searchGlyphName()));
+    connect(ui->characterWidget,SIGNAL(characterDoubleClicked(quint32)),this,SLOT(fillInGlyphName(quint32)));
 
     setFixedHeight(sizeHint().height());
 }
@@ -128,6 +129,11 @@ void MainWindow::addFirstReturnedResult()
     else
         glyphNameDoubleClicked(mNameList->item(0));
 
+}
+
+void MainWindow::fillInGlyphName(quint32 codepoint)
+{
+    ui->glyphName->setText(mDbAdapter->nameFromCodepoint( codepoint ));
 }
 
 void MainWindow::textentrySelectionChanged()

@@ -33,9 +33,11 @@ public slots:
 
 signals:
     void characterSelected(const QString &character);
+    void characterDoubleClicked(quint32 character);
 
 protected:
     void paintEvent(QPaintEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
     const DatabaseAdapter * mDbAdapter;
 
     QTransform transform;
