@@ -14,6 +14,8 @@ public:
     QStringList searchGlyphName(const QString & searchString, int maxCount, bool substringSearch, bool sortByCodepoint) const;
     static quint32 uintFromHexCodepoint(QString codepoint);
 
+    QSqlDatabase db() const;
+
 private:
     QSqlDatabase mDb;
     bool mDatabaseError;

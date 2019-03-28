@@ -87,3 +87,8 @@ quint32 DatabaseAdapter::uintFromHexCodepoint(QString codepoint)
     bool ok;
     return codepoint.toUInt(&ok,16);
 }
+
+QSqlDatabase DatabaseAdapter::db() const
+{
+    return mDb;
+}

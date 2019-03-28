@@ -7,6 +7,8 @@
 class QListWidget;
 class QCheckBox;
 class QListWidgetItem;
+class QDockWidget;
+class QCompleter;
 
 class DatabaseAdapter;
 
@@ -34,10 +36,14 @@ private slots:
 
     void textentrySelectionChanged();
 
+    void setDockVisible(bool visible);
+
 private:
     QListWidget *mNameList;
     QCheckBox *mSortByCodepoint;
     Ui::MainWindow *ui;
+    QDockWidget *cpDock;
+    QCompleter *completer;
 
     const DatabaseAdapter * mDbAdapter;
 

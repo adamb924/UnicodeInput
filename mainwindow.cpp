@@ -10,6 +10,8 @@
 #include <QFontDialog>
 #include <QDockWidget>
 #include <QScrollBar>
+#include <QCompleter>
+#include <QSqlTableModel>
 
 #include <QtDebug>
 
@@ -36,8 +38,9 @@ MainWindow::MainWindow(QWidget *parent):
     connect(ui->textEntry,SIGNAL(textChanged(QString)),ui->characterWidget,SLOT(updateText(QString)));
     connect(ui->changeFont,SIGNAL(clicked(bool)),this,SLOT(changeTopFont()));
     connect(ui->hex,SIGNAL(returnPressed()),this,SLOT(hexEntered()));
-    connect(ui->glyphName, SIGNAL(textEdited(const QString &)), this, SLOT(searchGlyphName()));
+    connect(ui->glyphName, SIGNAL(textChanged(const QString &)), this, SLOT(searchGlyphName()));
     connect(ui->glyphName,SIGNAL(returnPressed()),this,SLOT(addFirstReturnedResult()));
+    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
     connect(ui->substringSearch, SIGNAL(clicked(bool)), ui->numberToReturn, SLOT(setEnabled(bool)));
     connect(mNameList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(glyphNameDoubleClicked(QListWidgetItem*)));
     connect(ui->numberToReturn, SIGNAL(textEdited(const QString &)), this, SLOT(searchGlyphName()));
@@ -45,6 +48,15 @@ MainWindow::MainWindow(QWidget *parent):
     connect(ui->textEntry,SIGNAL(cursorPositionChanged(int,int)),ui->characterWidget,SLOT(cursorPosition(int,int)));
     connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(searchGlyphName()));
     connect(ui->characterWidget,SIGNAL(characterDoubleClicked(quint32)),this,SLOT(fillInGlyphName(quint32)));
+
+    QSqlTableModel * model = new QSqlTableModel(this,mDbAdapter->db());
+    model->setTable( "names" );
+    model->select();
+
+    completer = new QCompleter(model, this);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setCompletionColumn(1);
+    ui->glyphName->setCompleter(completer);
 
     setFixedHeight(sizeHint().height());
 }
@@ -97,7 +109,7 @@ void MainWindow::glyphNameDoubleClicked(QListWidgetItem *item)
 void MainWindow::createDock()
 {
     // Codepoint Name Doc
-    QDockWidget *cpDock = new QDockWidget("Codepoint Names",this);
+    cpDock = new QDockWidget("Codepoint Names",this);
     cpDock->setFeatures(QDockWidget::AllDockWidgetFeatures);
     QWidget *cpWidget = new QWidget(this);
     mNameList = new QListWidget;
@@ -112,6 +124,7 @@ void MainWindow::createDock()
     cpDock->setWidget(cpWidget);
     cpDock->setFloating(true);
     cpDock->resize(500,300);
+    cpDock->setVisible(false);
     addDockWidget(Qt::LeftDockWidgetArea,cpDock);
 }
 
@@ -150,6 +163,18 @@ void MainWindow::textentrySelectionChanged()
                 length--;
 
         ui->characterWidget->updateSelection(ui->textEntry->selectionStart(), length );
+    }
+}
+
+void MainWindow::setDockVisible(bool visible)
+{
+    cpDock->setVisible(visible);
+    // if the dock is visible, disable autocomplete
+    if(visible) {
+        ui->glyphName->setCompleter(nullptr);
+    }
+    else {
+        ui->glyphName->setCompleter(completer);
     }
 }
 
