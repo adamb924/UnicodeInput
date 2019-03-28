@@ -12,7 +12,7 @@ DatabaseAdapter::DatabaseAdapter()
 {
     if(!QSqlDatabase::isDriverAvailable("QSQLITE"))
     {
-        QMessageBox::critical (0,QObject::tr("Fatal error"), QObject::tr("The driver for the database is not available. This can happen if the file sqldrivers/qsqlite.dll cannot be found."));
+        QMessageBox::critical (nullptr,QObject::tr("Fatal error"), QObject::tr("The driver for the database is not available. This can happen if the file sqldrivers/qsqlite.dll cannot be found."));
         mDatabaseError=true;
         return;
     }
@@ -20,7 +20,7 @@ DatabaseAdapter::DatabaseAdapter()
     mDb.setDatabaseName("names.db");
     if(!mDb.open())
     {
-        QMessageBox::information (0,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(mDb.lastError().databaseText()) );
+        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(mDb.lastError().databaseText()) );
         mDatabaseError=true;
         return;
     }
@@ -29,7 +29,7 @@ DatabaseAdapter::DatabaseAdapter()
     q.next();
     if(q.value(0).toInt()<21742)
     {
-        QMessageBox::information (0,QObject::tr("Error Message"),QObject::tr("There was a problem in reading names.db (I was looking for %1). The ability to look up glyph names will either be impaired or completely unavailable.").arg(QDir::current().filePath("names.db")) );
+        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in reading names.db (I was looking for %1). The ability to look up glyph names will either be impaired or completely unavailable.").arg(QDir::current().filePath("names.db")) );
         mDatabaseError=true;
     }
 }

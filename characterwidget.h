@@ -18,7 +18,7 @@ class CharacterWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit CharacterWidget(QWidget *parent = 0);
+    explicit CharacterWidget(QWidget *parent = nullptr);
     void setDbAdapter(const DatabaseAdapter * db);
 
     QSize sizeHint() const;

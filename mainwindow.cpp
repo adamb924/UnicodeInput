@@ -73,7 +73,7 @@ bool MainWindow::databaseError() const
 
 void MainWindow::changeTopFont()
 {
-    QFont newFont = QFontDialog::getFont(0, ui->textEntry->font());
+    QFont newFont = QFontDialog::getFont(nullptr, ui->textEntry->font());
     ui->textEntry->setFont(newFont);
     ui->characterWidget->updateCharacterDisplayFont( newFont );
 }
@@ -84,7 +84,7 @@ void MainWindow::appendCodepoint(quint32 codepoint)
     QVector<quint32> array;
     array = ui->textEntry->text().toUcs4();
     array.insert(pos,codepoint);
-    ui->textEntry->setText(ui->textEntry->text().fromUcs4((quint32*)array.data(),array.size()));
+    ui->textEntry->setText(ui->textEntry->text().fromUcs4(static_cast<quint32*>(array.data()),array.size()));
     ui->textEntry->setCursorPosition(pos+1);
 }
 

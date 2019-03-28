@@ -7,7 +7,7 @@ class WorkaroundLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    explicit WorkaroundLineEdit(QWidget *parent = 0);
+    explicit WorkaroundLineEdit(QWidget *parent = nullptr);
 
 protected:
     void keyPressEvent(QKeyEvent * e);

@@ -7,7 +7,7 @@
 
 CharacterWidget::CharacterWidget(QWidget *parent)
     : QWidget(parent),
-      mDbAdapter(0)
+      mDbAdapter(nullptr)
 {
     squareHeight = 30;
     squareWidth = 22;
@@ -33,7 +33,7 @@ void CharacterWidget::setDbAdapter(const DatabaseAdapter *db)
 void CharacterWidget::updateFont(const QFont &font)
 {
     displayFont.setFamily(font.family());
-    displayFont.setPixelSize(0.5*squareHeight);
+    displayFont.setPixelSize(static_cast<int>(0.5f*squareHeight));
     adjustSize();
     update();
 }
@@ -69,7 +69,8 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
     painter.fillRect(event->rect(), QBrush(Qt::white));
     painter.setFont(displayFont);
 
-    quint32 key, cursorx;
+    quint32 key;
+    int cursorx;
     QFontMetrics fontMetrics(displayFont);
     QFontMetrics topFontFM(characterDisplayFont);
 
@@ -136,14 +137,14 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
         painter.setPen(QPen(Qt::red));
         if(hasSelection) // draw a big box
         {
-            painter.drawRect( aRects.at(selectionLeft).left() - 0.5*leftTextMargin , 0 , aRects.at(selectionLeft+selectionLength-1).right() - aRects.at(selectionLeft).left() + leftTextMargin + 0.5*rightmargin , 2*topTextMargin+squareHeight );
+            painter.drawRect( aRects.at(selectionLeft).left() - static_cast<int>(0.5f*leftTextMargin) , 0 , aRects.at(selectionLeft+selectionLength-1).right() - aRects.at(selectionLeft).left() + leftTextMargin + static_cast<int>(0.5f*rightmargin) , 2*topTextMargin+squareHeight );
         }
         else // single cursor position
         {
             if( cursor < aRects.length() )
-                cursorx = aRects.at(cursor).left() - 0.25*rightmargin;
+                cursorx = aRects.at(cursor).left() - static_cast<int>(0.25f*rightmargin);
             else
-                cursorx = aRects.last().right() + 0.75*rightmargin;
+                cursorx = aRects.last().right() + static_cast<int>(0.75f*rightmargin);
 
             painter.drawLine(cursorx,topTextMargin,cursorx,topTextMargin+squareHeight);
         }
