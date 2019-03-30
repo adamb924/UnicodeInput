@@ -16,3 +16,9 @@ HEADERS += mainwindow.h \
 
 FORMS += \
     mainwindow.ui
+
+DISTFILES += \
+    resources/UnicodeData.txt
+
+RESOURCES += \
+    resources.qrc

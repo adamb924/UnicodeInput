@@ -23,8 +23,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    bool databaseError() const;
-
 private slots:
     void searchGlyphName();
     void changeTopFont();

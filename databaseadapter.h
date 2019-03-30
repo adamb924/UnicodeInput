@@ -8,8 +8,6 @@ class DatabaseAdapter
 public:
     DatabaseAdapter();
 
-    bool databaseError() const;
-
     QString nameFromCodepoint(quint32 character) const;
     QStringList searchGlyphName(const QString & searchString, int maxCount, bool substringSearch, bool sortByCodepoint) const;
     static quint32 uintFromHexCodepoint(QString codepoint);
@@ -17,8 +15,9 @@ public:
     QSqlDatabase db() const;
 
 private:
+    void populateDatabaseFromResource();
+
     QSqlDatabase mDb;
-    bool mDatabaseError;
 };
 
 #endif // DATABASEADAPTER_H

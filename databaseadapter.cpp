@@ -6,14 +6,14 @@
 #include <QSqlQuery>
 #include <QVariant>
 #include <QDir>
+#include <QTextStream>
+#include <QtDebug>
 
 DatabaseAdapter::DatabaseAdapter()
-    : mDatabaseError(false)
 {
     if(!QSqlDatabase::isDriverAvailable("QSQLITE"))
     {
         QMessageBox::critical (nullptr,QObject::tr("Fatal error"), QObject::tr("The driver for the database is not available. This can happen if the file sqldrivers/qsqlite.dll cannot be found."));
-        mDatabaseError=true;
         return;
     }
     mDb = QSqlDatabase::addDatabase("QSQLITE");
@@ -21,22 +21,20 @@ DatabaseAdapter::DatabaseAdapter()
     if(!mDb.open())
     {
         QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(mDb.lastError().databaseText()) );
-        mDatabaseError=true;
         return;
     }
-    QSqlQuery q;
-    q.exec("select count(*) from names;");
-    q.next();
-    if(q.value(0).toInt()<21742)
-    {
-        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in reading names.db (I was looking for %1). The ability to look up glyph names will either be impaired or completely unavailable.").arg(QDir::current().filePath("names.db")) );
-        mDatabaseError=true;
+    if ( mDb.tables().contains( QLatin1String("names") ) ) {
+         QSqlQuery q;
+         q.exec("select count(*) from names;");
+         q.next();
+         if(q.value(0).toInt()<21742)
+         {
+             populateDatabaseFromResource();
+         }
+    } else {
+         populateDatabaseFromResource();
     }
-}
 
-bool DatabaseAdapter::databaseError() const
-{
-    return mDatabaseError;
 }
 
 QString DatabaseAdapter::nameFromCodepoint(quint32 character) const
@@ -91,4 +89,27 @@ quint32 DatabaseAdapter::uintFromHexCodepoint(QString codepoint)
 QSqlDatabase DatabaseAdapter::db() const
 {
     return mDb;
+}
+
+void DatabaseAdapter::populateDatabaseFromResource()
+{
+    mDb.transaction();
+    mDb.exec("DROP TABLE IF EXISTS names;");
+    mDb.exec("CREATE TABLE names ( codepoint text, name text);");
+    QFile data(":/resources/UnicodeData.txt");
+    if (data.open(QFile::ReadOnly)) {
+        QTextStream in(&data);
+        QSqlQuery q(mDb);
+        q.prepare("INSERT INTO names VALUES (?,?);");
+        while(!in.atEnd()) {
+            QStringList fields = in.readLine().split(';');
+            q.bindValue(0,fields.at(0));
+            q.bindValue(1,fields.at(1));
+            q.exec();
+        }
+        mDb.commit();
+    } else {
+        mDb.rollback();
+        qDebug() << "Error opening resource";
+    }
 }

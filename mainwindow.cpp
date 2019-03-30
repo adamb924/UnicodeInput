@@ -66,11 +66,6 @@ MainWindow::~MainWindow()
 
 }
 
-bool MainWindow::databaseError() const
-{
-    return mDbAdapter->databaseError();
-}
-
 void MainWindow::changeTopFont()
 {
     QFont newFont = QFontDialog::getFont(nullptr, ui->textEntry->font());
