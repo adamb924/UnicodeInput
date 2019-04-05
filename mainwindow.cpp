@@ -181,15 +181,15 @@ void MainWindow::updateQueryModel()
     {
         if( mSortByCodepoint->isChecked() )
         {
-            q.prepare("SELECT name,codepoint FROM names WHERE name LIKE ?||'%' "
+            q.prepare("SELECT name||' (U+'||codepoint||')',name,codepoint FROM names WHERE name LIKE ?||'%' "
                       "UNION "
-                      "SELECT name,codepoint FROM names WHERE name LIKE '%_'||?||'%' ORDER BY codepoint;");
+                      "SELECT name||' (U+'||codepoint||')',name,codepoint FROM names WHERE name LIKE '%_'||?||'%' ORDER BY codepoint;");
         }
         else
         {
-            q.prepare("SELECT name,codepoint,1 as ordering FROM names WHERE name LIKE ?||'%' "
+            q.prepare("SELECT name||' (U+'||codepoint||')',name,codepoint,1 as ordering FROM names WHERE name LIKE ?||'%' "
                       "UNION "
-                      "SELECT name,codepoint,2 as ordering FROM names WHERE name LIKE '%_'||?||'%' ORDER BY ordering ASC;"
+                      "SELECT name||' (U+'||codepoint||')',name,codepoint,2 as ordering FROM names WHERE name LIKE '%_'||?||'%' ORDER BY ordering ASC;"
                       );
         }
         q.bindValue(0, searchString );
