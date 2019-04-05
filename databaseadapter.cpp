@@ -79,35 +79,6 @@ quint32 DatabaseAdapter::codepointFromName(const QString &name) const
     return codepoint;
 }
 
-QStringList DatabaseAdapter::searchGlyphName(const QString &searchString, int maxCount, bool substringSearch, bool sortByCodepoint) const
-{
-    if( searchString.isEmpty() ) return QStringList();
-
-    QStringList results;
-
-    QString order;
-    if( sortByCodepoint )
-        order = "length(codepoint),codepoint";
-    else
-        order = "name";
-
-    QSqlQuery query(mDb);
-    query.exec(QString("select name,codepoint from names where substr(name,1,%1)='%2' order by %3;").arg(searchString.length()).arg(searchString).arg(order));
-    while(query.next())
-    {
-        results << QString("%1 (U+%2)").arg(query.value(0).toString()).arg(query.value(1).toString());
-    }
-
-    if(substringSearch && searchString.length() > 1 )
-    {
-        query.exec(QString("select name,codepoint from names where name like '%_%1%' order by %2 limit %3;").arg(searchString).arg(order).arg(maxCount) );
-        while(query.next())
-            results << QString("%1 (U+%2)").arg(query.value(0).toString()).arg(query.value(1).toString());
-    }
-
-    return results;
-}
-
 quint32 DatabaseAdapter::uintFromHexCodepoint(QString codepoint)
 {
     bool ok;
