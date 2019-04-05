@@ -5,8 +5,6 @@
 #include <QSqlDatabase>
 
 class QListView;
-class QTableView;
-class QListWidget;
 class QCheckBox;
 class QListWidgetItem;
 class QDockWidget;
@@ -29,7 +27,7 @@ public:
 private slots:
     void changeTopFont();
     void hexEntered();
-    void glyphNameDoubleClicked(QListWidgetItem *item);
+    void glyphNameDoubleClicked(const QModelIndex &index);
     void appendCodepoint(quint32 codepoint);
     void addFirstReturnedResult();
     void fillInGlyphName(quint32 codepoint);
@@ -41,7 +39,6 @@ private slots:
     void updateQueryModel();
 
 private:
-    QListWidget *mNameList;
     QListView *mNameView;
     QCheckBox *mSortByCodepoint;
     Ui::MainWindow *ui;

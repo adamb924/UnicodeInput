@@ -6,16 +6,18 @@
 
 #include <QApplication>
 
-#include <QListWidget>
 #include <QFontDialog>
 #include <QDockWidget>
 #include <QScrollBar>
 #include <QCompleter>
 #include <QSqlTableModel>
+#include <QSqlRecord>
 #include <QSqlQuery>
+#include <QSqlField>
 #include <QSqlError>
 #include <QSqlQueryModel>
-#include <QTableView>
+#include <QListView>
+#include <QLineEdit>
 
 #include <QtDebug>
 
@@ -41,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent):
     connect(ui->hex,SIGNAL(returnPressed()),this,SLOT(hexEntered()));
     connect(ui->glyphName, SIGNAL(textChanged(const QString &)), this, SLOT(updateQueryModel()));
     connect(ui->glyphName,SIGNAL(returnPressed()),this,SLOT(addFirstReturnedResult()));
-    connect(mNameList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(glyphNameDoubleClicked(QListWidgetItem*)));
+    connect(mNameView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(glyphNameDoubleClicked(const QModelIndex &)));
     connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(updateQueryModel()));
     connect(ui->textEntry,SIGNAL(cursorPositionChanged(int,int)),ui->characterWidget,SLOT(cursorPosition(int,int)));
     connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(updateQueryModel()));
@@ -95,14 +97,9 @@ void MainWindow::hexEntered()
 }
 
 
-void MainWindow::glyphNameDoubleClicked(QListWidgetItem *item)
+void MainWindow::glyphNameDoubleClicked(const QModelIndex &index)
 {
-    // get the text from the widget item, and strip out everything but the hex codepoint
-    QString name = item->text();
-    name.replace(QRegExp("^.*\\+"),"");
-    name.replace(")","");
-
-    appendCodepoint(DatabaseAdapter::uintFromHexCodepoint(name));
+    appendCodepoint(DatabaseAdapter::uintFromHexCodepoint( mQueryModel->record( index.row() ).value(2).toString() ));
 }
 
 void MainWindow::createDock()
@@ -111,7 +108,6 @@ void MainWindow::createDock()
     cpDock = new QDockWidget("Codepoint Names",this);
     cpDock->setFeatures(QDockWidget::AllDockWidgetFeatures);
     QWidget *cpWidget = new QWidget(this);
-    mNameList = new QListWidget;
     mNameView = new QListView;
     mNameView->setModelColumn(0);
     mSortByCodepoint = new QCheckBox(tr("Sort by codepoint order"));
@@ -131,11 +127,7 @@ void MainWindow::createDock()
 
 void MainWindow::addFirstReturnedResult()
 {
-    if(mNameList->count() < 1)
-        return;
-    else
-        glyphNameDoubleClicked(mNameList->item(0));
-
+    appendCodepoint( mDbAdapter->codepointFromName( ui->glyphName->text() ) );
 }
 
 void MainWindow::fillInGlyphName(quint32 codepoint)

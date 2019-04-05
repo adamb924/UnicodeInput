@@ -51,6 +51,17 @@ QString DatabaseAdapter::nameFromCodepoint(quint32 character) const
     return name;
 }
 
+quint32 DatabaseAdapter::codepointFromName(const QString &name) const
+{
+    quint32 codepoint = 0xFFFF;
+    QSqlQuery query(mDb);
+    query.prepare("select codepoint from names where name=?;");
+    query.bindValue(0, name);
+    if(query.exec() && query.next())
+        codepoint = uintFromHexCodepoint( query.value(0).toString() );
+    return codepoint;
+}
+
 QStringList DatabaseAdapter::searchGlyphName(const QString &searchString, int maxCount, bool substringSearch, bool sortByCodepoint) const
 {
     if( searchString.isEmpty() ) return QStringList();

@@ -9,6 +9,7 @@ public:
     DatabaseAdapter();
 
     QString nameFromCodepoint(quint32 character) const;
+    quint32 codepointFromName(const QString & name) const;
     QStringList searchGlyphName(const QString & searchString, int maxCount, bool substringSearch, bool sortByCodepoint) const;
     static quint32 uintFromHexCodepoint(QString codepoint);
 
