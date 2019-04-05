@@ -96,6 +96,8 @@ void DatabaseAdapter::populateDatabaseFromResource()
     mDb.transaction();
     mDb.exec("DROP TABLE IF EXISTS names;");
     mDb.exec("CREATE TABLE names ( codepoint text, name text);");
+    mDb.exec("CREATE INDEX name_index ON names(name);");
+    mDb.exec("CREATE UNIQUE INDEX codepoint_index ON names(name);");
     QFile data(":/resources/UnicodeData.txt");
     if (data.open(QFile::ReadOnly)) {
         QTextStream in(&data);
