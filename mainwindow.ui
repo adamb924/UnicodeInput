@@ -40,9 +40,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="changeFont">
+       <widget class="QPushButton" name="optionsButton">
         <property name="text">
-         <string>Change Font...</string>
+         <string>Options...</string>
         </property>
        </widget>
       </item>

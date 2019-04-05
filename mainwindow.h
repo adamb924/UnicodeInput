@@ -38,6 +38,7 @@ private slots:
     void setCompleterActive(bool visible);
 
     void updateQueryModel();
+    void setKeepWindowOnTop(bool stayOnTop);
 
 private:
     QListView *mNameView;

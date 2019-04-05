@@ -18,6 +18,9 @@
 #include <QSqlQueryModel>
 #include <QListView>
 #include <QLineEdit>
+#include <QMenu>
+#include <QToolButton>
+#include <QAction>
 
 #include <QtDebug>
 
@@ -26,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent):
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    setWindowFlags(Qt::Window);
 
     mDbAdapter = new DatabaseAdapter;
     ui->characterWidget->setDbAdapter(mDbAdapter);
@@ -37,9 +42,18 @@ MainWindow::MainWindow(QWidget *parent):
 
     ui->characterWidget->updateCharacterDisplayFont( ui->textEntry->font() );
 
+    QMenu * optionsMenu = new QMenu(ui->optionsButton);
+    optionsMenu->addAction("Change Font...",this,SLOT(changeTopFont()));
+    ui->optionsButton->setMenu(optionsMenu);
+
+    QAction * stayOnTop = new QAction("Keep window on top",optionsMenu);
+    stayOnTop->setCheckable(true);
+    stayOnTop->setChecked(false);
+    optionsMenu->addAction(stayOnTop);
+    connect(stayOnTop,SIGNAL(toggled(bool)), this, SLOT(setKeepWindowOnTop(bool)) );
+
     connect(ui->textEntry,SIGNAL(selectionChanged()),this,SLOT(textentrySelectionChanged()));
     connect(ui->textEntry,SIGNAL(textChanged(QString)),ui->characterWidget,SLOT(updateText(QString)));
-    connect(ui->changeFont,SIGNAL(clicked(bool)),this,SLOT(changeTopFont()));
     connect(ui->hex,SIGNAL(returnPressed()),this,SLOT(hexEntered()));
     connect(ui->glyphName, SIGNAL(textChanged(const QString &)), this, SLOT(updateQueryModel()));
     connect(ui->glyphName,SIGNAL(returnPressed()),this,SLOT(addFirstReturnedResult()));
@@ -75,7 +89,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::changeTopFont()
 {
-    QFont newFont = QFontDialog::getFont(nullptr, ui->textEntry->font());
+    QFont newFont = QFontDialog::getFont(nullptr, ui->textEntry->font(), this);
     ui->textEntry->setFont(newFont);
     ui->characterWidget->updateCharacterDisplayFont( newFont );
 }
@@ -203,5 +217,18 @@ void MainWindow::updateQueryModel()
     }
     mQueryModel->setQuery(q);
     mNameView->setModel(mQueryModel);
+}
+
+void MainWindow::setKeepWindowOnTop(bool stayOnTop)
+{
+    if( stayOnTop )
+    {
+        setWindowFlags(Qt::WindowStaysOnTopHint);
+    }
+    else
+    {
+        setWindowFlags(Qt::Window);
+    }
+    show();
 }
 
