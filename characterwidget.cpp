@@ -147,7 +147,8 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
         }
     }
 
-    QFrame::paintEvent(event);
+    painter.setPen(QPen(Qt::black));
+    painter.drawRect(event->rect().adjusted(0,0,-1,-1));
 }
 
 void CharacterWidget::mouseDoubleClickEvent(QMouseEvent *event)
