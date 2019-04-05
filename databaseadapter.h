@@ -7,6 +7,7 @@ class DatabaseAdapter
 {
 public:
     DatabaseAdapter();
+    ~DatabaseAdapter();
 
     QString nameFromCodepoint(quint32 character) const;
     quint32 codepointFromName(const QString & name) const;

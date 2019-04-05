@@ -49,6 +49,11 @@ DatabaseAdapter::DatabaseAdapter()
 
 }
 
+DatabaseAdapter::~DatabaseAdapter()
+{
+    mDb.close();
+}
+
 QString DatabaseAdapter::nameFromCodepoint(quint32 character) const
 {
     QString unicode = QString("%1").arg(character,4,16,QLatin1Char('0')).toUpper();
