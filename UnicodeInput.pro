@@ -7,12 +7,10 @@ TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
     characterwidget.cpp \
-    databaseadapter.cpp \
-    workaroundlineedit.cpp
+    databaseadapter.cpp
 HEADERS += mainwindow.h \
     characterwidget.h \
-    databaseadapter.h \
-    workaroundlineedit.h
+    databaseadapter.h
 
 FORMS += \
     mainwindow.ui
