@@ -4,11 +4,14 @@
 #include <QtWidgets/QMainWindow>
 #include <QSqlDatabase>
 
+class QListView;
+class QTableView;
 class QListWidget;
 class QCheckBox;
 class QListWidgetItem;
 class QDockWidget;
 class QCompleter;
+class QSqlQueryModel;
 
 class DatabaseAdapter;
 
@@ -24,7 +27,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void searchGlyphName();
     void changeTopFont();
     void hexEntered();
     void glyphNameDoubleClicked(QListWidgetItem *item);
@@ -36,14 +38,18 @@ private slots:
 
     void setDockVisible(bool visible);
 
+    void updateQueryModel();
+
 private:
     QListWidget *mNameList;
+    QListView *mNameView;
     QCheckBox *mSortByCodepoint;
     Ui::MainWindow *ui;
     QDockWidget *cpDock;
     QCompleter *completer;
 
     const DatabaseAdapter * mDbAdapter;
+    QSqlQueryModel * mQueryModel;
 
     void createDock();
 };

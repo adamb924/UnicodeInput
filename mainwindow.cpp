@@ -12,6 +12,10 @@
 #include <QScrollBar>
 #include <QCompleter>
 #include <QSqlTableModel>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlQueryModel>
+#include <QTableView>
 
 #include <QtDebug>
 
@@ -29,29 +33,29 @@ MainWindow::MainWindow(QWidget *parent):
     QRegExpValidator *hexval = new QRegExpValidator(QRegExp("[1234567890abcdefABCDEF]*"),this);
     ui->hex->setValidator(hexval);
 
-    QValidator *validator = new QIntValidator(1, 100000, this);
-    ui->numberToReturn->setValidator(validator);
-
     ui->characterWidget->updateCharacterDisplayFont( ui->textEntry->font() );
 
     connect(ui->textEntry,SIGNAL(selectionChanged()),this,SLOT(textentrySelectionChanged()));
     connect(ui->textEntry,SIGNAL(textChanged(QString)),ui->characterWidget,SLOT(updateText(QString)));
     connect(ui->changeFont,SIGNAL(clicked(bool)),this,SLOT(changeTopFont()));
     connect(ui->hex,SIGNAL(returnPressed()),this,SLOT(hexEntered()));
-    connect(ui->glyphName, SIGNAL(textChanged(const QString &)), this, SLOT(searchGlyphName()));
+    connect(ui->glyphName, SIGNAL(textChanged(const QString &)), this, SLOT(updateQueryModel()));
     connect(ui->glyphName,SIGNAL(returnPressed()),this,SLOT(addFirstReturnedResult()));
-    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
-    connect(ui->substringSearch, SIGNAL(clicked(bool)), ui->numberToReturn, SLOT(setEnabled(bool)));
     connect(mNameList,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(glyphNameDoubleClicked(QListWidgetItem*)));
-    connect(ui->numberToReturn, SIGNAL(textEdited(const QString &)), this, SLOT(searchGlyphName()));
-    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(searchGlyphName()));
+    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(updateQueryModel()));
     connect(ui->textEntry,SIGNAL(cursorPositionChanged(int,int)),ui->characterWidget,SLOT(cursorPosition(int,int)));
-    connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(searchGlyphName()));
+    connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(updateQueryModel()));
     connect(ui->characterWidget,SIGNAL(characterDoubleClicked(quint32)),this,SLOT(fillInGlyphName(quint32)));
+
+    // make the substring search dock appear and disappear
+    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
+    connect(cpDock, SIGNAL(visibilityChanged(bool)), ui->substringSearch, SLOT(setChecked(bool)) );
 
     QSqlTableModel * model = new QSqlTableModel(this,mDbAdapter->db());
     model->setTable( "names" );
     model->select();
+
+    mQueryModel = new QSqlQueryModel;
 
     completer = new QCompleter(model, this);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
@@ -108,10 +112,12 @@ void MainWindow::createDock()
     cpDock->setFeatures(QDockWidget::AllDockWidgetFeatures);
     QWidget *cpWidget = new QWidget(this);
     mNameList = new QListWidget;
+    mNameView = new QListView;
+    mNameView->setModelColumn(0);
     mSortByCodepoint = new QCheckBox(tr("Sort by codepoint order"));
     mSortByCodepoint->setChecked(true);
     QVBoxLayout  *cpLayout = new QVBoxLayout;
-    cpLayout->addWidget(mNameList);
+    cpLayout->addWidget(mNameView);
     cpLayout->addWidget(mSortByCodepoint);
 
     cpWidget->setLayout(cpLayout);
@@ -121,13 +127,6 @@ void MainWindow::createDock()
     cpDock->resize(500,300);
     cpDock->setVisible(false);
     addDockWidget(Qt::LeftDockWidgetArea,cpDock);
-}
-
-void MainWindow::searchGlyphName()
-{
-    mNameList->clear();
-    mNameList->addItems( mDbAdapter->searchGlyphName( ui->glyphName->text().toUpper(), ui->numberToReturn->text().toInt() , ui->substringSearch->isChecked(), mSortByCodepoint->isChecked() ) );
-    mNameList->verticalScrollBar()->setSliderPosition(0);
 }
 
 void MainWindow::addFirstReturnedResult()
@@ -171,5 +170,40 @@ void MainWindow::setDockVisible(bool visible)
     else {
         ui->glyphName->setCompleter(completer);
     }
+}
+
+void MainWindow::updateQueryModel()
+{
+    QSqlQuery q(mDbAdapter->db());
+    QString searchString = ui->glyphName->text().toUpper();
+
+    if( ui->substringSearch->isChecked() ) // then the dock is visible
+    {
+        if( mSortByCodepoint->isChecked() )
+        {
+            q.prepare("SELECT name,codepoint FROM names WHERE name LIKE ?||'%' "
+                      "UNION "
+                      "SELECT name,codepoint FROM names WHERE name LIKE '%_'||?||'%' ORDER BY codepoint;");
+        }
+        else
+        {
+            q.prepare("SELECT name,codepoint,1 as ordering FROM names WHERE name LIKE ?||'%' "
+                      "UNION "
+                      "SELECT name,codepoint,2 as ordering FROM names WHERE name LIKE '%_'||?||'%' ORDER BY ordering ASC;"
+                      );
+        }
+        q.bindValue(0, searchString );
+        q.bindValue(1, searchString );
+    }
+    else
+    {
+        q.prepare("select * from names where 1=2;");
+    }
+
+    if(!q.exec()) {
+        qDebug() << q.lastError();
+    }
+    mQueryModel->setQuery(q);
+    mNameView->setModel(mQueryModel);
 }
 
