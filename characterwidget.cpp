@@ -1,13 +1,12 @@
 #include <QtWidgets>
 
-#include <QFrame>
 #include <QtDebug>
 
 #include "characterwidget.h"
 #include "databaseadapter.h"
 
 CharacterWidget::CharacterWidget(QWidget *parent)
-    : QFrame(parent),
+    : QWidget(parent),
       mDbAdapter(nullptr)
 {
     squareHeight = 30;
@@ -47,7 +46,7 @@ void CharacterWidget::updateCharacterDisplayFont(const QFont &font)
 
 QSize CharacterWidget::sizeHint() const
 {
-    return QSize(10000, topTextMargin + squareHeight + bottomTextMargin );
+    return QSize(1000, topTextMargin + squareHeight + bottomTextMargin );
 //    return QSize(1000, mScreenScale * ( topTextMargin + squareHeight + bottomTextMargin ) );
 }
 
@@ -62,6 +61,10 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
 {
     // set up the environment
     QPainter painter(this);
+
+    transform = QTransform();
+    transform.scale( mScreenScale, mScreenScale );
+    painter.setWorldTransform(transform, false);
 
     painter.fillRect(event->rect(), QBrush(Qt::white));
     painter.setFont(displayFont);
@@ -146,8 +149,6 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
             painter.drawLine(cursorx,topTextMargin,cursorx,topTextMargin+squareHeight);
         }
     }
-
-    QFrame::paintEvent(event);
 }
 
 void CharacterWidget::mouseDoubleClickEvent(QMouseEvent *event)
