@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <QtDebug>
+#include <QStandardPaths>
 
 DatabaseAdapter::DatabaseAdapter()
 {
@@ -17,7 +18,18 @@ DatabaseAdapter::DatabaseAdapter()
         return;
     }
     mDb = QSqlDatabase::addDatabase("QSQLITE");
-    mDb.setDatabaseName("names.db");
+
+    QString writableLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if( writableLocation.isEmpty() )
+    {
+        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. No writable location could be found. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(mDb.lastError().databaseText()) );
+        return;
+    }
+
+    QDir dir(writableLocation);
+    dir.mkpath(writableLocation);
+    mDb.setDatabaseName( dir.absoluteFilePath("names.db"));
+
     if(!mDb.open())
     {
         QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(mDb.lastError().databaseText()) );
