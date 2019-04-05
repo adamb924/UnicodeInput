@@ -39,6 +39,10 @@ private slots:
 
     void updateQueryModel();
     void setKeepWindowOnTop(bool stayOnTop);
+    void setShowCodepoints(bool show);
+
+protected:
+    void closeEvent(QCloseEvent *event);
 
 private:
     QListView *mNameView;

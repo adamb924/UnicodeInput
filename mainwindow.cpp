@@ -21,6 +21,7 @@
 #include <QMenu>
 #include <QToolButton>
 #include <QAction>
+#include <QSettings>
 
 #include <QtDebug>
 
@@ -52,6 +53,12 @@ MainWindow::MainWindow(QWidget *parent):
     optionsMenu->addAction(stayOnTop);
     connect(stayOnTop,SIGNAL(toggled(bool)), this, SLOT(setKeepWindowOnTop(bool)) );
 
+    QAction * showCodepoints = new QAction("Show codepoints",optionsMenu);
+    showCodepoints->setCheckable(true);
+    showCodepoints->setChecked(true);
+    optionsMenu->addAction(showCodepoints);
+    connect(showCodepoints,SIGNAL(toggled(bool)), this, SLOT(setShowCodepoints(bool)) );
+
     connect(ui->textEntry,SIGNAL(selectionChanged()),this,SLOT(textentrySelectionChanged()));
     connect(ui->textEntry,SIGNAL(textChanged(QString)),ui->characterWidget,SLOT(updateText(QString)));
     connect(ui->hex,SIGNAL(returnPressed()),this,SLOT(hexEntered()));
@@ -79,7 +86,11 @@ MainWindow::MainWindow(QWidget *parent):
     completer->setCompletionColumn(1);
     ui->glyphName->setCompleter(completer);
 
-    setFixedHeight(sizeHint().height());
+    QSettings settings("AdamBaker", "UnicodeInput");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
+    stayOnTop->setChecked( settings.value("keepWindowOnTop",false).toBool() );
+    showCodepoints->setChecked( settings.value("showCodepoints",false).toBool() );
 }
 
 MainWindow::~MainWindow()
@@ -121,6 +132,7 @@ void MainWindow::createDock()
 {
     // Codepoint Name Doc
     cpDock = new QDockWidget("Codepoint Names",this);
+    cpDock->setObjectName("CodepointNames");
     cpDock->setFeatures(QDockWidget::AllDockWidgetFeatures);
     QWidget *cpWidget = new QWidget(this);
     mNameView = new QListView;
@@ -230,5 +242,32 @@ void MainWindow::setKeepWindowOnTop(bool stayOnTop)
         setWindowFlags(Qt::Window);
     }
     show();
+    setDockVisible ( ui->substringSearch->isChecked() );
+}
+
+void MainWindow::setShowCodepoints(bool show)
+{
+    if( show )
+    {
+        ui->characterWidget->show();
+    }
+    else
+    {
+        ui->characterWidget->hide();
+    }
+    int oldWidth = width();
+    adjustSize();
+    resize( oldWidth, sizeHint().height() );
+    setFixedHeight(sizeHint().height());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    QSettings settings("AdamBaker", "UnicodeInput");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("windowState", saveState());
+    settings.setValue("keepWindowOnTop", static_cast<bool>(windowFlags() & Qt::WindowStaysOnTopHint) );
+    settings.setValue("showCodepoints", ui->characterWidget->isVisible() );
+    QMainWindow::closeEvent(event);
 }
 
