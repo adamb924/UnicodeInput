@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent):
     // make the substring search dock appear and disappear
     connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
     connect(cpDock, SIGNAL(visibilityChanged(bool)), ui->substringSearch, SLOT(setChecked(bool)) );
+    connect(cpDock, SIGNAL(visibilityChanged(bool)), this, SLOT(setCompleterActive(bool)) );
 
     QSqlTableModel * model = new QSqlTableModel(this,mDbAdapter->db());
     model->setTable( "names" );
@@ -155,6 +156,11 @@ void MainWindow::textentrySelectionChanged()
 void MainWindow::setDockVisible(bool visible)
 {
     cpDock->setVisible(visible);
+    setCompleterActive(visible);
+}
+
+void MainWindow::setCompleterActive(bool visible)
+{
     // if the dock is visible, disable autocomplete
     if(visible) {
         ui->glyphName->setCompleter(nullptr);

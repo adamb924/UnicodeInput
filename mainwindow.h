@@ -35,6 +35,7 @@ private slots:
     void textentrySelectionChanged();
 
     void setDockVisible(bool visible);
+    void setCompleterActive(bool visible);
 
     void updateQueryModel();
 
