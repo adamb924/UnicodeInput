@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent):
     connect(cpDock, SIGNAL(visibilityChanged(bool)), ui->substringSearch, SLOT(setChecked(bool)) );
     connect(cpDock, SIGNAL(visibilityChanged(bool)), this, SLOT(setCompleterActive(bool)) );
 
-    QSqlTableModel * model = new QSqlTableModel(this,mDbAdapter->db());
+    QSqlTableModel * model = new QSqlTableModel(this, QSqlDatabase::database() );
     model->setTable( "names" );
     model->select();
 
@@ -172,7 +172,7 @@ void MainWindow::setCompleterActive(bool visible)
 
 void MainWindow::updateQueryModel()
 {
-    QSqlQuery q(mDbAdapter->db());
+    QSqlQuery q(QSqlDatabase::database());
     QString searchString = ui->glyphName->text().toUpper();
 
     if( ui->substringSearch->isChecked() ) // then the dock is visible

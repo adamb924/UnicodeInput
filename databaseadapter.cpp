@@ -17,25 +17,25 @@ DatabaseAdapter::DatabaseAdapter()
         QMessageBox::critical (nullptr,QObject::tr("Fatal error"), QObject::tr("The driver for the database is not available. This can happen if the file sqldrivers/qsqlite.dll cannot be found."));
         return;
     }
-    mDb = QSqlDatabase::addDatabase("QSQLITE");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
     QString writableLocation = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if( writableLocation.isEmpty() )
     {
-        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. No writable location could be found. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(mDb.lastError().databaseText()) );
+        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. No writable location could be found. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(db.lastError().databaseText()) );
         return;
     }
 
     QDir dir(writableLocation);
     dir.mkpath(writableLocation);
-    mDb.setDatabaseName( dir.absoluteFilePath("names.db"));
+    db.setDatabaseName( dir.absoluteFilePath("names.db"));
 
-    if(!mDb.open())
+    if(!db.open())
     {
-        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(mDb.lastError().databaseText()) );
+        QMessageBox::information (nullptr,QObject::tr("Error Message"),QObject::tr("There was a problem in opening the database. The program said: %1. It is unlikely that you will solve this on your own. Rather you had better contact the developer.").arg(db.lastError().databaseText()) );
         return;
     }
-    if ( mDb.tables().contains( QLatin1String("names") ) ) {
+    if ( db.tables().contains( QLatin1String("names") ) ) {
          QSqlQuery q;
          q.exec("select count(*) from names;");
          q.next();
@@ -49,17 +49,13 @@ DatabaseAdapter::DatabaseAdapter()
 
 }
 
-DatabaseAdapter::~DatabaseAdapter()
-{
-    mDb.close();
-}
-
 QString DatabaseAdapter::nameFromCodepoint(quint32 character) const
 {
+    QSqlDatabase db = QSqlDatabase::database();
     QString unicode = QString("%1").arg(character,4,16,QLatin1Char('0')).toUpper();
 
     QString name="Codepoint not found in database!";
-    QSqlQuery query(mDb);
+    QSqlQuery query(db);
     query.prepare("select name from names where codepoint=?;");
     query.bindValue(0, unicode);
     if(query.exec() && query.next())
@@ -70,8 +66,9 @@ QString DatabaseAdapter::nameFromCodepoint(quint32 character) const
 
 quint32 DatabaseAdapter::codepointFromName(const QString &name) const
 {
+    QSqlDatabase db = QSqlDatabase::database();
     quint32 codepoint = 0xFFFF;
-    QSqlQuery query(mDb);
+    QSqlQuery query(db);
     query.prepare("select codepoint from names where name=?;");
     query.bindValue(0, name);
     if(query.exec() && query.next())
@@ -85,22 +82,18 @@ quint32 DatabaseAdapter::uintFromHexCodepoint(QString codepoint)
     return codepoint.toUInt(&ok,16);
 }
 
-QSqlDatabase DatabaseAdapter::db() const
-{
-    return mDb;
-}
-
 void DatabaseAdapter::populateDatabaseFromResource()
 {
-    mDb.transaction();
-    mDb.exec("DROP TABLE IF EXISTS names;");
-    mDb.exec("CREATE TABLE names ( codepoint text, name text);");
-    mDb.exec("CREATE INDEX name_index ON names(name);");
-    mDb.exec("CREATE UNIQUE INDEX codepoint_index ON names(name);");
+    QSqlDatabase db = QSqlDatabase::database();
+    db.transaction();
+    db.exec("DROP TABLE IF EXISTS names;");
+    db.exec("CREATE TABLE names ( codepoint text, name text);");
+    db.exec("CREATE INDEX name_index ON names(name);");
+    db.exec("CREATE UNIQUE INDEX codepoint_index ON names(name);");
     QFile data(":/resources/UnicodeData.txt");
     if (data.open(QFile::ReadOnly)) {
         QTextStream in(&data);
-        QSqlQuery q(mDb);
+        QSqlQuery q(db);
         q.prepare("INSERT INTO names VALUES (?,?);");
         while(!in.atEnd()) {
             QStringList fields = in.readLine().split(';');
@@ -108,9 +101,9 @@ void DatabaseAdapter::populateDatabaseFromResource()
             q.bindValue(1,fields.at(1));
             q.exec();
         }
-        mDb.commit();
+        db.commit();
     } else {
-        mDb.rollback();
+        db.rollback();
         qDebug() << "Error opening resource";
     }
 }
