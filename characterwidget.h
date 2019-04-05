@@ -5,7 +5,7 @@
 #include <QPoint>
 #include <QSize>
 #include <QString>
-#include <QtWidgets/QWidget>
+#include <QtWidgets/QFrame>
 #include <QVector>
 
 class QMouseEvent;
@@ -13,7 +13,7 @@ class QPaintEvent;
 class MainWindow;
 class DatabaseAdapter;
 
-class CharacterWidget : public QWidget
+class CharacterWidget : public QFrame
 {
     Q_OBJECT
 
