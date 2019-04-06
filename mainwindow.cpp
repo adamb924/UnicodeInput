@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent):
 {
     ui->setupUi(this);
 
+    int properHeight = sizeHint().height();
+
     DatabaseAdapter::initializeDatabase();
 
     setWindowFlags(Qt::Window);
@@ -60,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent):
 
     readSettings();
 
-    setFixedHeight(sizeHint().height());
+    setFixedHeight(properHeight);
 }
 
 MainWindow::~MainWindow()
@@ -150,6 +152,7 @@ void MainWindow::createDock()
     cpDock = new QDockWidget("Codepoint Names",this);
     cpDock->setObjectName("CodepointNames");
     cpDock->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    cpDock->setSizePolicy(QSizePolicy(QSizePolicy::Preferred,QSizePolicy::MinimumExpanding));
     QWidget *cpWidget = new QWidget(this);
     mNameView = new QListView;
     mNameView->setModelColumn(0);
