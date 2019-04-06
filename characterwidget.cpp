@@ -7,21 +7,17 @@
 #include "databaseadapter.h"
 
 CharacterWidget::CharacterWidget(QWidget *parent)
-    : QFrame(parent)
+    : QFrame(parent),
+        mScreenScale(QGuiApplication::primaryScreen()->logicalDotsPerInch() / 120.0),
+        squareWidth(22),
+        squareHeight(30),
+        topTextMargin(2),
+        bottomTextMargin(4),
+        leftTextMargin(3),
+        rightmargin(5),
+        rectPadding(4)
 {
-    squareHeight = 30;
-    squareWidth = 22;
-
-    mScreenScale = QGuiApplication::primaryScreen()->logicalDotsPerInch() / 120.0;
-
-    topTextMargin = 2;
-    bottomTextMargin = 4;
-    leftTextMargin = 3;
-    rightmargin = 5;
-    rectPadding = 4;
-
     updateFont(QFont()); // default initialization
-
     setSizePolicy( QSizePolicy::Maximum , QSizePolicy::Minimum );
 }
 
@@ -61,7 +57,6 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
     painter.setFont(displayFont);
 
     quint32 key;
-    int cursorx;
     QFontMetrics fontMetrics(displayFont);
     QFontMetrics topFontFM(characterDisplayFont);
 
@@ -132,6 +127,7 @@ void CharacterWidget::paintEvent(QPaintEvent *event)
         }
         else // single cursor position
         {
+            int cursorx;
             if( cursor < aRects.length() )
                 cursorx = aRects.at(cursor).left() - static_cast<int>(0.25f*rightmargin);
             else
