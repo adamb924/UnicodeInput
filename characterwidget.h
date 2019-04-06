@@ -11,7 +11,6 @@
 class QMouseEvent;
 class QPaintEvent;
 class MainWindow;
-class DatabaseAdapter;
 
 class CharacterWidget : public QFrame
 {
@@ -19,7 +18,6 @@ class CharacterWidget : public QFrame
 
 public:
     explicit CharacterWidget(QWidget *parent = nullptr);
-    void setDbAdapter(const DatabaseAdapter * db);
 
     QSize sizeHint() const;
     QFont font();
@@ -38,7 +36,6 @@ signals:
 protected:
     void paintEvent(QPaintEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
-    const DatabaseAdapter * mDbAdapter;
 
     QTransform transform;
     QList<QRect> aRects;

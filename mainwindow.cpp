@@ -31,33 +31,17 @@ MainWindow::MainWindow(QWidget *parent):
 {
     ui->setupUi(this);
 
-    setWindowFlags(Qt::Window);
+    DatabaseAdapter::initializeDatabase();
 
-    mDbAdapter = new DatabaseAdapter;
-    ui->characterWidget->setDbAdapter(mDbAdapter);
+    setWindowFlags(Qt::Window);
 
     createDock();
 
-    QRegExpValidator *hexval = new QRegExpValidator(QRegExp("[1234567890abcdefABCDEF]*"),this);
-    ui->hex->setValidator(hexval);
+    setupHexValidator();
 
     ui->characterWidget->updateCharacterDisplayFont( ui->textEntry->font() );
 
-    QMenu * optionsMenu = new QMenu(ui->optionsButton);
-    optionsMenu->addAction("Change Font...",this,SLOT(changeTopFont()));
-    ui->optionsButton->setMenu(optionsMenu);
-
-    QAction * stayOnTop = new QAction("Keep window on top",optionsMenu);
-    stayOnTop->setCheckable(true);
-    stayOnTop->setChecked(false);
-    optionsMenu->addAction(stayOnTop);
-    connect(stayOnTop,SIGNAL(toggled(bool)), this, SLOT(setKeepWindowOnTop(bool)) );
-
-    QAction * showCodepoints = new QAction("Show codepoints",optionsMenu);
-    showCodepoints->setCheckable(true);
-    showCodepoints->setChecked(true);
-    optionsMenu->addAction(showCodepoints);
-    connect(showCodepoints,SIGNAL(toggled(bool)), this, SLOT(setShowCodepoints(bool)) );
+    setupOptionsMenu();
 
     connect(ui->textEntry,SIGNAL(selectionChanged()),this,SLOT(textentrySelectionChanged()));
     connect(ui->textEntry,SIGNAL(textChanged(QString)),ui->characterWidget,SLOT(updateText(QString)));
@@ -70,27 +54,11 @@ MainWindow::MainWindow(QWidget *parent):
     connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(updateQueryModel()));
     connect(ui->characterWidget,SIGNAL(characterDoubleClicked(quint32)),this,SLOT(fillInGlyphName(quint32)));
 
-    // make the substring search dock appear and disappear
-    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
-    connect(cpDock, SIGNAL(visibilityChanged(bool)), ui->substringSearch, SLOT(setChecked(bool)) );
-    connect(cpDock, SIGNAL(visibilityChanged(bool)), this, SLOT(setCompleterActive(bool)) );
+    mSubstringQueryModel = new QSqlQueryModel;
 
-    QSqlTableModel * model = new QSqlTableModel(this, QSqlDatabase::database() );
-    model->setTable( "names" );
-    model->select();
+    setupGlyphNameAutocomplete();
 
-    mQueryModel = new QSqlQueryModel;
-
-    completer = new QCompleter(model, this);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    completer->setCompletionColumn(1);
-    ui->glyphName->setCompleter(completer);
-
-    QSettings settings("AdamBaker", "UnicodeInput");
-    restoreGeometry(settings.value("geometry").toByteArray());
-    restoreState(settings.value("windowState").toByteArray());
-    stayOnTop->setChecked( settings.value("keepWindowOnTop",false).toBool() );
-    showCodepoints->setChecked( settings.value("showCodepoints",false).toBool() );
+    readSettings();
 
     setFixedHeight(sizeHint().height());
 }
@@ -98,6 +66,52 @@ MainWindow::MainWindow(QWidget *parent):
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::setupHexValidator()
+{
+    QRegExpValidator *hexval = new QRegExpValidator(QRegExp("[1234567890abcdefABCDEF]*"),this);
+    ui->hex->setValidator(hexval);
+}
+
+void MainWindow::setupGlyphNameAutocomplete()
+{
+    QSqlTableModel * autocompleteModel = new QSqlTableModel(this, QSqlDatabase::database() );
+    autocompleteModel->setTable( "names" );
+    autocompleteModel->select();
+
+    completer = new QCompleter(autocompleteModel, this);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setCompletionColumn(1);
+    ui->glyphName->setCompleter(completer);
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings("AdamBaker", "UnicodeInput");
+    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreState(settings.value("windowState").toByteArray());
+    stayOnTop->setChecked( settings.value("keepWindowOnTop",false).toBool() );
+    showCodepoints->setChecked( settings.value("showCodepoints",false).toBool() );
+}
+
+void MainWindow::setupOptionsMenu()
+{
+    QMenu * optionsMenu = new QMenu(ui->optionsButton);
+    optionsMenu->addAction("Change Font...",this,SLOT(changeTopFont()));
+    ui->optionsButton->setMenu(optionsMenu);
+
+    stayOnTop = new QAction("Keep window on top",optionsMenu);
+    stayOnTop->setCheckable(true);
+    stayOnTop->setChecked(false);
+    optionsMenu->addAction(stayOnTop);
+    connect(stayOnTop,SIGNAL(toggled(bool)), this, SLOT(setKeepWindowOnTop(bool)) );
+
+    showCodepoints = new QAction("Show codepoints",optionsMenu);
+    showCodepoints->setCheckable(true);
+    showCodepoints->setChecked(true);
+    optionsMenu->addAction(showCodepoints);
+    connect(showCodepoints,SIGNAL(toggled(bool)), this, SLOT(setShowCodepoints(bool)) );
 }
 
 void MainWindow::changeTopFont()
@@ -120,14 +134,14 @@ void MainWindow::appendCodepoint(quint32 codepoint)
 void MainWindow::hexEntered()
 {
     quint32 character = DatabaseAdapter::uintFromHexCodepoint(ui->hex->text());
-    ui->glyphNameLabel->setText( mDbAdapter->nameFromCodepoint(character) );
+    ui->glyphNameLabel->setText( DatabaseAdapter::nameFromCodepoint(character) );
     appendCodepoint(character);
 }
 
 
 void MainWindow::glyphNameDoubleClicked(const QModelIndex &index)
 {
-    appendCodepoint(DatabaseAdapter::uintFromHexCodepoint( mQueryModel->record( index.row() ).value(2).toString() ));
+    appendCodepoint(DatabaseAdapter::uintFromHexCodepoint( mSubstringQueryModel->record( index.row() ).value(2).toString() ));
 }
 
 void MainWindow::createDock()
@@ -152,16 +166,21 @@ void MainWindow::createDock()
     cpDock->resize(500,300);
     cpDock->setVisible(false);
     addDockWidget(Qt::LeftDockWidgetArea,cpDock);
+
+    // make the substring search dock appear and disappear
+    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
+    connect(cpDock, SIGNAL(visibilityChanged(bool)), ui->substringSearch, SLOT(setChecked(bool)) );
+    connect(cpDock, SIGNAL(visibilityChanged(bool)), this, SLOT(setCompleterActive(bool)) );
 }
 
 void MainWindow::addFirstReturnedResult()
 {
-    appendCodepoint( mDbAdapter->codepointFromName( ui->glyphName->text() ) );
+    appendCodepoint( DatabaseAdapter::codepointFromName( ui->glyphName->text() ) );
 }
 
 void MainWindow::fillInGlyphName(quint32 codepoint)
 {
-    ui->glyphName->setText(mDbAdapter->nameFromCodepoint( codepoint ));
+    ui->glyphName->setText( DatabaseAdapter::nameFromCodepoint( codepoint ) );
 }
 
 void MainWindow::textentrySelectionChanged()
@@ -229,8 +248,8 @@ void MainWindow::updateQueryModel()
     if(!q.exec()) {
         qDebug() << q.lastError();
     }
-    mQueryModel->setQuery(q);
-    mNameView->setModel(mQueryModel);
+    mSubstringQueryModel->setQuery(q);
+    mNameView->setModel(mSubstringQueryModel);
 }
 
 void MainWindow::setKeepWindowOnTop(bool stayOnTop)

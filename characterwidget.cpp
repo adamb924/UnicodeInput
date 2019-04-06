@@ -7,8 +7,7 @@
 #include "databaseadapter.h"
 
 CharacterWidget::CharacterWidget(QWidget *parent)
-    : QFrame(parent),
-      mDbAdapter(nullptr)
+    : QFrame(parent)
 {
     squareHeight = 30;
     squareWidth = 22;
@@ -24,11 +23,6 @@ CharacterWidget::CharacterWidget(QWidget *parent)
     updateFont(QFont()); // default initialization
 
     setSizePolicy( QSizePolicy::Maximum , QSizePolicy::Minimum );
-}
-
-void CharacterWidget::setDbAdapter(const DatabaseAdapter *db)
-{
-    mDbAdapter = db;
 }
 
 void CharacterWidget::updateFont(const QFont &font)
@@ -191,7 +185,7 @@ bool CharacterWidget::event(QEvent *event)
         int index = whichGlyph( transform.inverted().map( helpEvent->pos() ) );
         if (index != -1)
         {
-            QToolTip::showText(helpEvent->globalPos(), mDbAdapter->nameFromCodepoint( theString[index] ) );
+            QToolTip::showText(helpEvent->globalPos(), DatabaseAdapter::nameFromCodepoint( theString[index] ) );
         }
         else
         {

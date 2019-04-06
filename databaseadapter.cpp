@@ -12,6 +12,11 @@
 
 DatabaseAdapter::DatabaseAdapter()
 {
+
+}
+
+void DatabaseAdapter::initializeDatabase()
+{
     if(!QSqlDatabase::isDriverAvailable("QSQLITE"))
     {
         QMessageBox::critical (nullptr,QObject::tr("Fatal error"), QObject::tr("The driver for the database is not available. This can happen if the file sqldrivers/qsqlite.dll cannot be found."));
@@ -46,10 +51,9 @@ DatabaseAdapter::DatabaseAdapter()
     } else {
          populateDatabaseFromResource();
     }
-
 }
 
-QString DatabaseAdapter::nameFromCodepoint(quint32 character) const
+QString DatabaseAdapter::nameFromCodepoint(quint32 character)
 {
     QSqlDatabase db = QSqlDatabase::database();
     QString unicode = QString("%1").arg(character,4,16,QLatin1Char('0')).toUpper();
@@ -64,7 +68,7 @@ QString DatabaseAdapter::nameFromCodepoint(quint32 character) const
     return name;
 }
 
-quint32 DatabaseAdapter::codepointFromName(const QString &name) const
+quint32 DatabaseAdapter::codepointFromName(const QString &name)
 {
     QSqlDatabase db = QSqlDatabase::database();
     quint32 codepoint = 0xFFFF;

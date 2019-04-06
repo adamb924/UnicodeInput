@@ -8,12 +8,13 @@ class DatabaseAdapter
 public:
     DatabaseAdapter();
 
-    QString nameFromCodepoint(quint32 character) const;
-    quint32 codepointFromName(const QString & name) const;
+    static void initializeDatabase();
+    static QString nameFromCodepoint(quint32 character);
+    static quint32 codepointFromName(const QString & name);
     static quint32 uintFromHexCodepoint(QString codepoint);
 
 private:
-    void populateDatabaseFromResource();
+    static void populateDatabaseFromResource();
 };
 
 #endif // DATABASEADAPTER_H

@@ -24,6 +24,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void setupHexValidator();
+
+    void setupGlyphNameAutocomplete();
+
+    void readSettings();
+
 private slots:
     void changeTopFont();
     void hexEntered();
@@ -50,11 +56,12 @@ private:
     Ui::MainWindow *ui;
     QDockWidget *cpDock;
     QCompleter *completer;
+    QAction *stayOnTop, *showCodepoints;
 
-    const DatabaseAdapter * mDbAdapter;
-    QSqlQueryModel * mQueryModel;
+    QSqlQueryModel * mSubstringQueryModel;
 
     void createDock();
+    void setupOptionsMenu();
 };
 
 #endif // MAINWINDOW_H
