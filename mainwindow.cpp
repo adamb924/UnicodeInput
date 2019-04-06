@@ -91,6 +91,8 @@ MainWindow::MainWindow(QWidget *parent):
     restoreState(settings.value("windowState").toByteArray());
     stayOnTop->setChecked( settings.value("keepWindowOnTop",false).toBool() );
     showCodepoints->setChecked( settings.value("showCodepoints",false).toBool() );
+
+    setFixedHeight(sizeHint().height());
 }
 
 MainWindow::~MainWindow()
