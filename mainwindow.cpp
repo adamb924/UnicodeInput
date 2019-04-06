@@ -93,8 +93,13 @@ void MainWindow::readSettings()
     QSettings settings("AdamBaker", "UnicodeInput");
     restoreGeometry(settings.value("geometry").toByteArray());
     restoreState(settings.value("windowState").toByteArray());
+
     stayOnTop->setChecked( settings.value("keepWindowOnTop",false).toBool() );
     showCodepoints->setChecked( settings.value("showCodepoints",false).toBool() );
+
+    QFont f;
+    f.fromString( settings.value("font").toString() );
+    ui->textEntry->setFont(f);
 }
 
 void MainWindow::setupOptionsMenu()
@@ -292,6 +297,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue("windowState", saveState());
     settings.setValue("keepWindowOnTop", static_cast<bool>(windowFlags() & Qt::WindowStaysOnTopHint) );
     settings.setValue("showCodepoints", ui->characterWidget->isVisible() );
+    settings.setValue("font", ui->textEntry->font().toString() );
     QMainWindow::closeEvent(event);
 }
 
