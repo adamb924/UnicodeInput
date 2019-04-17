@@ -15,7 +15,8 @@ CharacterWidget::CharacterWidget(QWidget *parent)
         bottomTextMargin(4),
         leftTextMargin(3),
         rightmargin(5),
-        rectPadding(4)
+        rectPadding(4),
+        cursor(0)
 {
     updateFont(QFont()); // default initialization
     setSizePolicy( QSizePolicy::Maximum , QSizePolicy::Minimum );
