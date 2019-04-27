@@ -114,9 +114,9 @@
       <item row="2" column="1">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QCheckBox" name="substringSearch">
+         <widget class="QCheckBox" name="detailedResults">
           <property name="text">
-           <string>Search for any substring</string>
+           <string>Show detailed search results</string>
           </property>
          </widget>
         </item>
@@ -132,6 +132,16 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="substringSearch">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Search for any substring</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

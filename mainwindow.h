@@ -4,7 +4,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QSqlDatabase>
 
-class QListView;
+class QTableView;
 class QCheckBox;
 class QListWidgetItem;
 class QDockWidget;
@@ -12,6 +12,7 @@ class QCompleter;
 class QSqlQueryModel;
 
 class DatabaseAdapter;
+class CodepointProxy;
 
 namespace Ui {
     class MainWindow;
@@ -47,21 +48,27 @@ private slots:
     void setKeepWindowOnTop(bool stayOnTop);
     void setShowCodepoints(bool show);
 
+    void changeSort(int logicalIndex, Qt::SortOrder order);
+    void detailedResultsChanged(int state);
+    void useDisplaySizeChanged(int state);
+
 protected:
     void closeEvent(QCloseEvent *event);
 
 private:
-    QListView *mNameView;
-    QCheckBox *mSortByCodepoint;
+    QTableView *mNameView;
     Ui::MainWindow *ui;
     QDockWidget *cpDock;
     QCompleter *completer;
     QAction *stayOnTop, *showCodepoints;
+    QCheckBox * mUseDisplaySize;
 
     QSqlQueryModel * mSubstringQueryModel;
+    CodepointProxy * mProxyModel;
 
     void createDock();
     void setupOptionsMenu();
+    void setDisplayFont(const QFont & font);
 };
 
 #endif // MAINWINDOW_H

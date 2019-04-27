@@ -3,9 +3,9 @@
 
 #include "databaseadapter.h"
 #include "characterwidget.h"
+#include "codepointproxy.h"
 
 #include <QApplication>
-
 #include <QFontDialog>
 #include <QDockWidget>
 #include <QScrollBar>
@@ -16,12 +16,13 @@
 #include <QSqlField>
 #include <QSqlError>
 #include <QSqlQueryModel>
-#include <QListView>
+#include <QTableView>
 #include <QLineEdit>
 #include <QMenu>
 #include <QToolButton>
 #include <QAction>
 #include <QSettings>
+#include <QHeaderView>
 
 #include <QtDebug>
 
@@ -41,8 +42,6 @@ MainWindow::MainWindow(QWidget *parent):
 
     setupHexValidator();
 
-    ui->characterWidget->updateCharacterDisplayFont( ui->textEntry->font() );
-
     setupOptionsMenu();
 
     connect(ui->textEntry,SIGNAL(selectionChanged()),this,SLOT(textentrySelectionChanged()));
@@ -51,18 +50,24 @@ MainWindow::MainWindow(QWidget *parent):
     connect(ui->glyphName, SIGNAL(textChanged(const QString &)), this, SLOT(updateQueryModel()));
     connect(ui->glyphName,SIGNAL(returnPressed()),this,SLOT(addFirstReturnedResult()));
     connect(mNameView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(glyphNameDoubleClicked(const QModelIndex &)));
+    connect(ui->detailedResults, SIGNAL(clicked(bool)), this, SLOT(updateQueryModel()));
     connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(updateQueryModel()));
     connect(ui->textEntry,SIGNAL(cursorPositionChanged(int,int)),ui->characterWidget,SLOT(cursorPosition(int,int)));
-    connect(mSortByCodepoint, SIGNAL(clicked()), this, SLOT(updateQueryModel()));
     connect(ui->characterWidget,SIGNAL(characterDoubleClicked(quint32)),this,SLOT(fillInGlyphName(quint32)));
+    connect(mNameView->horizontalHeader(), SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)), this, SLOT(changeSort(int, Qt::SortOrder)));
+    connect(ui->detailedResults, SIGNAL(stateChanged(int)), this, SLOT(detailedResultsChanged(int)));
+    connect(mUseDisplaySize, SIGNAL(stateChanged(int)), this, SLOT(useDisplaySizeChanged(int)));
 
     mSubstringQueryModel = new QSqlQueryModel;
+    mProxyModel = new CodepointProxy;
 
     setupGlyphNameAutocomplete();
 
     readSettings();
 
     setFixedHeight(properHeight);
+
+    updateQueryModel();
 }
 
 MainWindow::~MainWindow()
@@ -96,10 +101,13 @@ void MainWindow::readSettings()
 
     stayOnTop->setChecked( settings.value("keepWindowOnTop",false).toBool() );
     showCodepoints->setChecked( settings.value("showCodepoints",false).toBool() );
+    mUseDisplaySize->setChecked( settings.value("useDisplaySize",false).toBool() );
 
     QFont f;
     f.fromString( settings.value("font").toString() );
-    ui->textEntry->setFont(f);
+    setDisplayFont(f);
+
+    detailedResultsChanged(ui->detailedResults->checkState());
 }
 
 void MainWindow::setupOptionsMenu()
@@ -121,15 +129,27 @@ void MainWindow::setupOptionsMenu()
     connect(showCodepoints,SIGNAL(toggled(bool)), this, SLOT(setShowCodepoints(bool)) );
 }
 
+void MainWindow::setDisplayFont(const QFont &font)
+{
+    ui->textEntry->setFont(font);
+    mProxyModel->setFont(font);
+}
+
 void MainWindow::changeTopFont()
 {
     QFont newFont = QFontDialog::getFont(nullptr, ui->textEntry->font(), this);
     ui->textEntry->setFont(newFont);
-    ui->characterWidget->updateCharacterDisplayFont( newFont );
+    setDisplayFont( newFont );
+    mNameView->viewport()->update();
+    mNameView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
 
 void MainWindow::appendCodepoint(quint32 codepoint)
 {
+    if( codepoint == 0xFFFF )
+    {
+        return;
+    }
     int pos = ui->textEntry->cursorPosition();
     QVector<quint32> array;
     array = ui->textEntry->text().toUcs4();
@@ -154,18 +174,25 @@ void MainWindow::glyphNameDoubleClicked(const QModelIndex &index)
 void MainWindow::createDock()
 {
     // Codepoint Name Doc
-    cpDock = new QDockWidget("Codepoint Names",this);
+    cpDock = new QDockWidget("Search Results",this);
     cpDock->setObjectName("CodepointNames");
     cpDock->setFeatures(QDockWidget::AllDockWidgetFeatures);
     cpDock->setSizePolicy(QSizePolicy(QSizePolicy::Preferred,QSizePolicy::MinimumExpanding));
     QWidget *cpWidget = new QWidget(this);
-    mNameView = new QListView;
-    mNameView->setModelColumn(0);
-    mSortByCodepoint = new QCheckBox(tr("Sort by codepoint order"));
-    mSortByCodepoint->setChecked(true);
+    mNameView = new QTableView;
+
+    mNameView->setSortingEnabled(true);
+    mNameView->horizontalHeader()->setSortIndicatorShown(true);
+    mNameView->verticalHeader()->hide();
+    mNameView->setSelectionBehavior( QAbstractItemView::SelectRows);
+    mNameView->setSelectionMode( QAbstractItemView::SingleSelection );
+    mNameView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    mUseDisplaySize = new QCheckBox(tr("Use same font size as the text input window"), cpWidget);
+
     QVBoxLayout  *cpLayout = new QVBoxLayout;
     cpLayout->addWidget(mNameView);
-    cpLayout->addWidget(mSortByCodepoint);
+    cpLayout->addWidget(mUseDisplaySize);
 
     cpWidget->setLayout(cpLayout);
 
@@ -176,8 +203,8 @@ void MainWindow::createDock()
     addDockWidget(Qt::LeftDockWidgetArea,cpDock);
 
     // make the substring search dock appear and disappear
-    connect(ui->substringSearch, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
-    connect(cpDock, SIGNAL(visibilityChanged(bool)), ui->substringSearch, SLOT(setChecked(bool)) );
+    connect(ui->detailedResults, SIGNAL(clicked(bool)), this, SLOT(setDockVisible(bool)));
+    connect(cpDock, SIGNAL(visibilityChanged(bool)), ui->detailedResults, SLOT(setChecked(bool)) );
     connect(cpDock, SIGNAL(visibilityChanged(bool)), this, SLOT(setCompleterActive(bool)) );
 }
 
@@ -230,34 +257,40 @@ void MainWindow::updateQueryModel()
     QSqlQuery q(QSqlDatabase::database());
     QString searchString = ui->glyphName->text().toUpper();
 
-    if( ui->substringSearch->isChecked() ) // then the dock is visible
+    if( ui->detailedResults->isChecked() && !searchString.isEmpty() ) // then the dock is visible
     {
-        if( mSortByCodepoint->isChecked() )
+        if( ui->substringSearch->isChecked() )
         {
-            q.prepare("SELECT name||' (U+'||codepoint||')',name,codepoint FROM names WHERE name LIKE ?||'%' "
+            q.prepare("SELECT name,codepoint,codepoint,1 as ordering FROM names WHERE name LIKE ?||'%' "
                       "UNION "
-                      "SELECT name||' (U+'||codepoint||')',name,codepoint FROM names WHERE name LIKE '%_'||?||'%' ORDER BY codepoint;");
+                      "SELECT name,codepoint,codepoint,2 as ordering FROM names WHERE name LIKE '%_'||?||'%' ORDER BY ordering ASC;"
+                      );
         }
         else
         {
-            q.prepare("SELECT name||' (U+'||codepoint||')',name,codepoint,1 as ordering FROM names WHERE name LIKE ?||'%' "
-                      "UNION "
-                      "SELECT name||' (U+'||codepoint||')',name,codepoint,2 as ordering FROM names WHERE name LIKE '%_'||?||'%' ORDER BY ordering ASC;"
-                      );
+            q.prepare("SELECT name,codepoint,codepoint FROM names WHERE name LIKE ?||'%';");
         }
         q.bindValue(0, searchString );
         q.bindValue(1, searchString );
     }
     else
     {
-        q.prepare("select * from names where 1=2;");
+        q.prepare("select name,codepoint,codepoint from names where 1=2;");
     }
 
     if(!q.exec()) {
         qDebug() << q.lastError();
     }
+
+    mSubstringQueryModel->setHeaderData(0,Qt::Horizontal,tr("Name"));
+    mSubstringQueryModel->setHeaderData(1,Qt::Horizontal,tr("Character"));
+    mSubstringQueryModel->setHeaderData(2,Qt::Horizontal,tr("Codepoint"));
     mSubstringQueryModel->setQuery(q);
-    mNameView->setModel(mSubstringQueryModel);
+    mProxyModel->setSourceModel(mSubstringQueryModel);
+    mNameView->setModel(mProxyModel);
+    mNameView->setColumnHidden(3,true);
+    mNameView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder );
+    mNameView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
 
 void MainWindow::setKeepWindowOnTop(bool stayOnTop)
@@ -290,6 +323,25 @@ void MainWindow::setShowCodepoints(bool show)
     setFixedHeight(sizeHint().height());
 }
 
+void MainWindow::changeSort(int logicalIndex, Qt::SortOrder order)
+{
+    mSubstringQueryModel->sort(logicalIndex, order);
+    mProxyModel->setSourceModel(mSubstringQueryModel);
+    mNameView->setModel(mProxyModel);
+}
+
+void MainWindow::detailedResultsChanged(int state)
+{
+    ui->substringSearch->setEnabled(state == Qt::Checked);
+}
+
+void MainWindow::useDisplaySizeChanged(int state)
+{
+    mProxyModel->setUseDisplaySize(state == Qt::Checked);
+    mNameView->viewport()->update();
+    mNameView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings("AdamBaker", "UnicodeInput");
@@ -298,6 +350,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue("keepWindowOnTop", static_cast<bool>(windowFlags() & Qt::WindowStaysOnTopHint) );
     settings.setValue("showCodepoints", ui->characterWidget->isVisible() );
     settings.setValue("font", ui->textEntry->font().toString() );
+    settings.setValue("useDisplaySize", mUseDisplaySize->checkState() == Qt::Checked );
     QMainWindow::closeEvent(event);
 }
 

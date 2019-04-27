@@ -5,11 +5,13 @@ QT += widgets sql
 TARGET = UnicodeInput
 TEMPLATE = app
 SOURCES += main.cpp \
+    codepointproxy.cpp \
     mainwindow.cpp \
     characterwidget.cpp \
     databaseadapter.cpp
 HEADERS += mainwindow.h \
     characterwidget.h \
+    codepointproxy.h \
     databaseadapter.h
 
 FORMS += \
