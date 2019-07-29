@@ -32,8 +32,6 @@ MainWindow::MainWindow(QWidget *parent):
 {
     ui->setupUi(this);
 
-    int properHeight = sizeHint().height();
-
     DatabaseAdapter::initializeDatabase();
 
     setWindowFlags(Qt::Window);
@@ -65,9 +63,9 @@ MainWindow::MainWindow(QWidget *parent):
 
     readSettings();
 
-    setFixedHeight(properHeight);
-
     updateQueryModel();
+
+    ui->characterWidget->show();
 }
 
 MainWindow::~MainWindow()
@@ -133,6 +131,7 @@ void MainWindow::setDisplayFont(const QFont &font)
 {
     ui->textEntry->setFont(font);
     mProxyModel->setFont(font);
+    setFixedHeight(sizeHint().height());
 }
 
 void MainWindow::changeTopFont()

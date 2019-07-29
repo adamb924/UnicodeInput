@@ -39,7 +39,6 @@ void CharacterWidget::updateCharacterDisplayFont(const QFont &font)
 QSize CharacterWidget::sizeHint() const
 {
     return QSize(10000, topTextMargin + squareHeight + bottomTextMargin );
-//    return QSize(1000, mScreenScale * ( topTextMargin + squareHeight + bottomTextMargin ) );
 }
 
 void CharacterWidget::updateText(QString str)
