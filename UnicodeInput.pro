@@ -22,3 +22,5 @@ DISTFILES += \
 
 RESOURCES += \
     resources.qrc
+
+RC_ICONS = icons/UnicodeInput.ico

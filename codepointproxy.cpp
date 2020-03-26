@@ -2,7 +2,7 @@
 
 #include "databaseadapter.h"
 
-CodepointProxy::CodepointProxy() : mFontMetrics(mFont),  mUseDisplaySize(false)
+CodepointProxy::CodepointProxy(QObject *parent) : QSortFilterProxyModel(parent), mFontMetrics(mFont),  mUseDisplaySize(false)
 {
 
 }

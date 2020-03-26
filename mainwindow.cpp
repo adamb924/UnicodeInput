@@ -5,24 +5,8 @@
 #include "characterwidget.h"
 #include "codepointproxy.h"
 
-#include <QApplication>
-#include <QFontDialog>
-#include <QDockWidget>
-#include <QScrollBar>
-#include <QCompleter>
-#include <QSqlTableModel>
-#include <QSqlRecord>
-#include <QSqlQuery>
-#include <QSqlField>
-#include <QSqlError>
-#include <QSqlQueryModel>
-#include <QTableView>
-#include <QLineEdit>
-#include <QMenu>
-#include <QToolButton>
-#include <QAction>
-#include <QSettings>
-#include <QHeaderView>
+#include <QtGui>
+#include <QtSql>
 
 #include <QtDebug>
 
@@ -38,13 +22,14 @@ MainWindow::MainWindow(QWidget *parent):
 
     createDock();
 
-    setupHexValidator();
+    setupValidators();
 
     setupOptionsMenu();
 
     connect(ui->textEntry,SIGNAL(selectionChanged()),this,SLOT(textentrySelectionChanged()));
     connect(ui->textEntry,SIGNAL(textChanged(QString)),ui->characterWidget,SLOT(updateText(QString)));
     connect(ui->hex,SIGNAL(returnPressed()),this,SLOT(hexEntered()));
+    connect(ui->decimalEdit,SIGNAL(returnPressed()),this,SLOT(decEntered()));
     connect(ui->glyphName, SIGNAL(textChanged(const QString &)), this, SLOT(updateQueryModel()));
     connect(ui->glyphName,SIGNAL(returnPressed()),this,SLOT(addFirstReturnedResult()));
     connect(mNameView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(glyphNameDoubleClicked(const QModelIndex &)));
@@ -56,16 +41,9 @@ MainWindow::MainWindow(QWidget *parent):
     connect(ui->detailedResults, SIGNAL(stateChanged(int)), this, SLOT(detailedResultsChanged(int)));
     connect(mUseDisplaySize, SIGNAL(stateChanged(int)), this, SLOT(useDisplaySizeChanged(int)));
 
-    mSubstringQueryModel = new QSqlQueryModel;
-    mProxyModel = new CodepointProxy;
-
     setupGlyphNameAutocomplete();
-
+    setupQueryModel();
     readSettings();
-
-    updateQueryModel();
-
-    ui->characterWidget->show();
 }
 
 MainWindow::~MainWindow()
@@ -73,10 +51,13 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::setupHexValidator()
+void MainWindow::setupValidators()
 {
     QRegExpValidator *hexval = new QRegExpValidator(QRegExp("[1234567890abcdefABCDEF]*"),this);
     ui->hex->setValidator(hexval);
+
+    QIntValidator *intval = new QIntValidator(0,0x10FFFF,this);
+    ui->decimalEdit->setValidator( intval );
 }
 
 void MainWindow::setupGlyphNameAutocomplete()
@@ -164,6 +145,12 @@ void MainWindow::hexEntered()
     appendCodepoint(character);
 }
 
+void MainWindow::decEntered()
+{
+    quint32 character = ui->decimalEdit->text().toUInt();
+    ui->glyphNameLabel->setText( DatabaseAdapter::nameFromCodepoint(character) );
+    appendCodepoint(character);
+}
 
 void MainWindow::glyphNameDoubleClicked(const QModelIndex &index)
 {
@@ -251,6 +238,21 @@ void MainWindow::setCompleterActive(bool visible)
     }
 }
 
+void MainWindow::setupQueryModel()
+{
+    mSubstringQueryModel = new QSqlQueryModel(this);
+    mProxyModel = new CodepointProxy(this);
+
+    mSubstringQueryModel->setHeaderData(0,Qt::Horizontal,tr("Name"));
+    mSubstringQueryModel->setHeaderData(1,Qt::Horizontal,tr("Character"));
+    mSubstringQueryModel->setHeaderData(2,Qt::Horizontal,tr("Codepoint"));
+    mProxyModel->setSourceModel(mSubstringQueryModel);
+    mNameView->setModel(mProxyModel);
+    mNameView->setColumnHidden(3,true);
+    mNameView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder );
+    mNameView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+}
+
 void MainWindow::updateQueryModel()
 {
     QSqlQuery q(QSqlDatabase::database());
@@ -264,13 +266,14 @@ void MainWindow::updateQueryModel()
                       "UNION "
                       "SELECT name,codepoint,codepoint,2 as ordering FROM names WHERE name LIKE '%_'||?||'%' ORDER BY ordering ASC;"
                       );
+            q.bindValue(0, searchString );
+            q.bindValue(1, searchString );
         }
         else
         {
             q.prepare("SELECT name,codepoint,codepoint FROM names WHERE name LIKE ?||'%';");
+            q.bindValue(0, searchString );
         }
-        q.bindValue(0, searchString );
-        q.bindValue(1, searchString );
     }
     else
     {
@@ -280,16 +283,11 @@ void MainWindow::updateQueryModel()
     if(!q.exec()) {
         qDebug() << q.lastError();
     }
+    mSubstringQueryModel->setQuery(q);
 
     mSubstringQueryModel->setHeaderData(0,Qt::Horizontal,tr("Name"));
     mSubstringQueryModel->setHeaderData(1,Qt::Horizontal,tr("Character"));
     mSubstringQueryModel->setHeaderData(2,Qt::Horizontal,tr("Codepoint"));
-    mSubstringQueryModel->setQuery(q);
-    mProxyModel->setSourceModel(mSubstringQueryModel);
-    mNameView->setModel(mProxyModel);
-    mNameView->setColumnHidden(3,true);
-    mNameView->horizontalHeader()->setSortIndicator(-1, Qt::AscendingOrder );
-    mNameView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 }
 
 void MainWindow::setKeepWindowOnTop(bool stayOnTop)

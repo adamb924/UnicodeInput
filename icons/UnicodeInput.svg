@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="967.55908"
+   height="967.55908"
+   viewBox="0 0 256 256"
+   version="1.1"
+   id="svg8"
+   sodipodi:docname="UnicodeInput.svg"
+   inkscape:export-filename="C:\Users\Adam\Documents\QtWork\UnicodeInput\icons\UnicodeInput-256.png"
+   inkscape:export-xdpi="25.4"
+   inkscape:export-ydpi="25.4"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <defs
+     id="defs2">
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Blur"
+       id="filter208">
+      <feGaussianBlur
+         stdDeviation="5 5"
+         result="fbSourceGraphic"
+         id="feGaussianBlur206" />
+      <feColorMatrix
+         result="fbSourceGraphicAlpha"
+         in="fbSourceGraphic"
+         values="0 0 0 -1 0 0 0 0 -1 0 0 0 0 -1 0 0 0 0 1 0"
+         id="feColorMatrix210" />
+      <feGaussianBlur
+         id="feGaussianBlur212"
+         stdDeviation="5 5"
+         result="blur"
+         in="fbSourceGraphic" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="436.45223"
+     inkscape:cy="507.07195"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1600"
+     inkscape:window-height="796"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Code"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-41)"
+     style="display:inline">
+    <rect
+       style="fill:#ffffff;stroke-width:0.26458332"
+       id="rect3728"
+       width="292.39288"
+       height="290.2547"
+       x="-12.294398"
+       y="31.334099" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot18"
+       style="font-style:normal;font-weight:normal;font-size:88px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#b3b3b3;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,2.6726953,41)"><flowRegion
+         id="flowRegion20"
+         style="fill:#b3b3b3"><rect
+           id="rect22"
+           width="4351.4287"
+           height="1168.5715"
+           x="-2.8571429"
+           y="-1.0123465"
+           style="fill:#b3b3b3" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara80">58F909CDCF65B5591E</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara186">7C0C444D68A9BF2530</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara188">A6F9BA1C998881110A</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara190">22C14346663B450548</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara192">EBA6043FB0332F4DCB</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara194">C3530FEA74B2D0E3B9</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara196">82B7E84671B846BCE3</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara198">445804ABAD020AE260</flowPara><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Lucida Console';-inkscape-font-specification:'Lucida Console';fill:#b3b3b3"
+         id="flowPara200">08386DD1759C90AA1A</flowPara></flowRoot>    <g
+       style="display:inline;fill:#000080"
+       inkscape:label="Layer 1"
+       id="g3919"
+       transform="matrix(0.85164109,0,0,0.85164109,-141.45844,-309.36157)"
+       sodipodi:insensitive="true">
+      <path
+         inkscape:connector-curvature="0"
+         style="fill:#000080"
+         d="M 460.14287,485.57644 H 439.64849 419.1541 l -0.25561,84.97956 -0.25562,84.97955 -6,-7.72955 -6,-7.72956 -0.5,-15.2945 -0.5,-15.2945 -3.5,2.6614 c -1.925,1.46377 -6.425,4.01834 -10,5.67681 -11.25558,5.22157 -27.66932,4.94761 -39.5,-0.65929 -11.62507,-5.50945 -24.03523,-18.93495 -32.43618,-35.08992 l -4.16018,-8 10.82106,-0.53045 c 9.7404,-0.47748 11.4679,-0.86262 17.29818,-3.85653 12.15997,-6.24427 19.84723,-15.58904 20.7173,-25.18434 0.62529,-6.89579 -1.80238,-11.81475 -7.00594,-14.19549 -11.87617,-5.43359 -9.4892,-5.23319 -62.33194,-5.23319 -36.75553,0 -49.70158,0.30778 -51.5,1.22438 -1.32126,0.67341 -4.8939,2.13236 -7.93919,3.24212 -9.25192,3.37155 -20.09413,12.99036 -24.54592,21.77625 -2.68601,5.301 -2.9134,6.58935 -2.86939,16.25725 0.0425,9.33358 0.33862,11.05544 2.66581,15.5 2.97647,5.68459 9.4003,12.07701 15.28639,15.21165 5.81051,3.09439 19.31415,5.56683 28.0067,5.12788 4.04729,-0.20438 7.63603,-0.64893 7.97499,-0.98789 0.33896,-0.33895 -1.55222,-3.48174 -4.20261,-6.98396 -11.42835,-15.10142 -11.87894,-24.10865 -1.60965,-32.17706 4.40451,-3.46054 14.25693,-3.10509 20.82872,0.75146 5.57486,3.27151 12.43746,9.9991 16.38017,16.05792 1.43163,2.2 2.84133,4.225 3.13268,4.5 2.50387,2.36342 4.55206,13.18511 3.52832,18.64207 -0.82738,4.41032 -7.04132,10.77475 -12.75022,13.05899 -2.25212,0.90112 -3.70488,2.07602 -3.43539,2.77831 0.53665,1.39848 16.00303,23.04579 20.7344,29.02063 5.16268,6.51949 5.64072,8.2208 3.03249,10.79239 l -2.23905,2.20761 -2.19078,-2.68921 c -1.20492,-1.47907 -2.91677,-3.71689 -3.80411,-4.97293 l -1.61334,-2.28371 -3.88666,2.92481 c -4.11687,3.09806 -14.59647,11.32391 -29.64692,23.27104 -5.02327,3.9875 -9.68904,7.25 -10.36838,7.25 -0.67935,0 -2.15482,-1.29153 -3.27884,-2.87006 l -2.04366,-2.87006 5.57703,-4.37994 c 3.06737,-2.40897 9.75801,-7.75494 14.86808,-11.87994 5.11008,-4.125 11.64009,-9.3 14.51113,-11.5 2.87104,-2.2 6.12378,-4.70067 7.22832,-5.55705 1.96433,-1.52301 1.87224,-1.74719 -4.21109,-10.25186 -7.07633,-9.89292 -8.02233,-10.76546 -8.02233,-7.39933 0,10.26391 -12.22576,22.70872 -25.77636,26.23821 -7.0519,1.83678 -15.5377,1.88176 -21.41321,0.11349 -5.84111,-1.75791 -15.12142,-8.64518 -18.47267,-13.70925 -2.95585,-4.4666 -4.15299,-12.15689 -2.59028,-16.63968 l 0.98923,-2.83771 -9.61835,-4e-5 c -10.82138,-4e-5 -15.04788,-1.55117 -20.76056,-7.61915 -5.80839,-6.16964 -7.7276,-11.34483 -7.7276,-20.83763 0,-9.67386 2.15053,-15.28355 7.25153,-18.91579 4.10084,-2.92005 5.2527,-2.65354 8.8693,2.05207 l 3.17902,4.13628 -3.95318,4.49105 c -9.48855,10.77957 -7.37708,24.76478 4.02017,26.62735 4.16782,0.68111 15.39941,-1.08408 19.2033,-3.01805 4.10408,-2.0866 6.19356,-1.66896 8.14059,1.62709 0.97468,1.65 2.14856,3 2.60862,3 2.16597,0 1.86071,3.43678 -0.56088,6.31467 -2.42434,2.88117 -2.58879,3.66535 -2.1623,10.31094 0.39815,6.204 0.89902,7.7449 3.64417,11.21093 4.61168,5.82272 10.15289,7.72421 18.32748,6.28915 13.5902,-2.38578 24.31688,-10.54069 27.4178,-20.84425 0.7613,-2.52962 1.38418,-4.97778 1.38418,-5.44037 0,-0.46259 -3.51525,-0.84107 -7.81166,-0.84107 -22.16433,0 -47.27768,-13.95496 -59.39451,-33.00427 -10.39328,-16.33967 -11.04325,-37.61246 -1.56712,-51.29019 5.9659,-8.61109 16.66848,-17.66137 24.27329,-20.5259 5.91851,-2.22934 16.31226,-3.16465 35.25,-3.17209 l 19.25,-0.008 v -13 -13 h -49.46354 -49.46355 l -5.20133,-6.25 -5.20133,-6.25 141.91487,-0.26676 c 141.25502,-0.26553 141.9226,-0.25739 143.57517,1.75 2.35643,2.11254 4.25262,4.47429 5.95331,7.1763 l 2.11361,2.96828 -2.10924,0.55158 z m -88.21719,120.96532 c 13.02007,-2.11288 24.81277,-9.38623 31.71913,-19.56331 l 2.49806,-3.6811 v -48.86046 -48.86045 h -56 -56 v 13 13 l 17.25,0.008 c 32.46508,0.0143 40.70618,1.96082 50.77251,11.99241 5.53213,5.51304 6.82278,7.48696 8.5,13 2.6618,8.74932 2.45948,19.52989 -0.51316,27.34367 -4.4029,11.57332 -13.67306,19.91067 -27.00935,24.29152 -7.39719,2.42992 -7.74247,3.47702 -3.08804,9.36481 6.40041,8.09643 17.6773,11.26864 31.87085,8.96532 z m -92.00562,-8.16025 c 8.98296,-4.221 11.89415,-12.73388 6.3751,-18.64204 -3.1466,-3.36845 -6.87865,-4.69951 -10.57522,-3.77173 -3.5349,0.88721 -8.64398,5.52459 -10.20648,9.26418 -1.55159,3.71347 -0.95164,5.99828 3.23707,12.32784 2.95752,4.46912 3.34644,4.49773 11.16953,0.82175 z"
+         id="path3917"
+         sodipodi:nodetypes="ccccccccccsscccsssssssssssssssssssssccccccsscccsssssssscccssscccssssssssssssssccccccccccccccccccccccccsssssccssssc" />
+    </g>
+  </g>
+</svg>

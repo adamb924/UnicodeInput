@@ -25,7 +25,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void setupHexValidator();
+    void setupValidators();
 
     void setupGlyphNameAutocomplete();
 
@@ -34,6 +34,7 @@ public:
 private slots:
     void changeTopFont();
     void hexEntered();
+    void decEntered();
     void glyphNameDoubleClicked(const QModelIndex &index);
     void appendCodepoint(quint32 codepoint);
     void addFirstReturnedResult();
@@ -44,6 +45,7 @@ private slots:
     void setDockVisible(bool visible);
     void setCompleterActive(bool visible);
 
+    void setupQueryModel();
     void updateQueryModel();
     void setKeepWindowOnTop(bool stayOnTop);
     void setShowCodepoints(bool show);

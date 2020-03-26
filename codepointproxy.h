@@ -7,7 +7,7 @@
 class CodepointProxy : public QSortFilterProxyModel
 {
 public:
-    CodepointProxy();
+    CodepointProxy(QObject *parent = nullptr);
 
     QVariant data(const QModelIndex &index, int role) const override;
     void setFont(const QFont & font);
