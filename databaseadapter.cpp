@@ -93,7 +93,7 @@ void DatabaseAdapter::populateDatabaseFromResource()
     db.exec("DROP TABLE IF EXISTS names;");
     db.exec("CREATE TABLE names ( codepoint text, name text);");
     db.exec("CREATE INDEX name_index ON names(name);");
-    db.exec("CREATE UNIQUE INDEX codepoint_index ON names(name);");
+    db.exec("CREATE UNIQUE INDEX codepoint_index ON names(codepoint);");
     QFile data(":/resources/UnicodeData.txt");
     if (data.open(QFile::ReadOnly)) {
         QTextStream in(&data);
@@ -101,9 +101,17 @@ void DatabaseAdapter::populateDatabaseFromResource()
         q.prepare("INSERT INTO names VALUES (?,?);");
         while(!in.atEnd()) {
             QStringList fields = in.readLine().split(';');
+            QString name = fields.at(1);
+            if( name == "<control>" )
+            {
+                name = fields.at(10);
+            }
+
             q.bindValue(0,fields.at(0));
-            q.bindValue(1,fields.at(1));
-            q.exec();
+            q.bindValue(1,name);
+            if( ! q.exec() ) {
+                qDebug() << "DatabaseAdapter::populateDatabaseFromResource" << q.lastError().text() << q.lastQuery();
+            }
         }
         db.commit();
     } else {
