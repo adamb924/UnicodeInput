@@ -18,8 +18,6 @@ MainWindow::MainWindow(QWidget *parent):
 
     DatabaseAdapter::initializeDatabase();
 
-    setWindowFlags(Qt::Window);
-
     createDock();
 
     setupValidators();
@@ -112,7 +110,6 @@ void MainWindow::setDisplayFont(const QFont &font)
 {
     ui->textEntry->setFont(font);
     mProxyModel->setFont(font);
-    setFixedHeight(sizeHint().height());
 }
 
 void MainWindow::changeTopFont()
@@ -294,11 +291,11 @@ void MainWindow::setKeepWindowOnTop(bool stayOnTop)
 {
     if( stayOnTop )
     {
-        setWindowFlags(Qt::WindowStaysOnTopHint);
+        setWindowFlag(Qt::WindowStaysOnTopHint, true);
     }
     else
     {
-        setWindowFlags(Qt::Window);
+        setWindowFlag(Qt::WindowStaysOnTopHint, false);
     }
     show();
     setDockVisible ( ui->substringSearch->isChecked() );
@@ -349,5 +346,20 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue("font", ui->textEntry->font().toString() );
     settings.setValue("useDisplaySize", mUseDisplaySize->checkState() == Qt::Checked );
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::wheelEvent(QWheelEvent *event)
+{
+    QFont font = ui->textEntry->font();
+    if( event->angleDelta().y() > 0 )
+    {
+        font.setPointSize( font.pointSize() + 2 );
+    }
+    else
+    {
+        font.setPointSize( font.pointSize() - 2 );
+    }
+    ui->textEntry->setFont( font );
+    adjustSize();
 }
 

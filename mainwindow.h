@@ -56,6 +56,7 @@ private slots:
 
 protected:
     void closeEvent(QCloseEvent *event);
+    void wheelEvent(QWheelEvent *event);
 
 private:
     QTableView *mNameView;
