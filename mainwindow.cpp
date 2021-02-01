@@ -380,7 +380,11 @@ void MainWindow::wheelEvent(QWheelEvent *event)
         font.setPointSize( font.pointSize() - 2 );
     }
     ui->textEntry->setFont( font );
-    adjustSize();
+
+    /// retain the current width, so that only the height of the widget is changed
+    QSize s = sizeHint();
+    s.setWidth( width() );
+    resize( s );
 }
 
 void MainWindow::changeEvent(QEvent *event)
