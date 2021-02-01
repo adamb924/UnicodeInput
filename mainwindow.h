@@ -49,6 +49,7 @@ private slots:
     void updateQueryModel();
     void setKeepWindowOnTop(bool stayOnTop);
     void setShowCodepoints(bool show);
+    void setOpacityLevel();
 
     void changeSort(int logicalIndex, Qt::SortOrder order);
     void detailedResultsChanged(int state);
@@ -57,6 +58,7 @@ private slots:
 protected:
     void closeEvent(QCloseEvent *event);
     void wheelEvent(QWheelEvent *event);
+    void changeEvent(QEvent *event);
 
 private:
     QTableView *mNameView;
@@ -65,6 +67,7 @@ private:
     QCompleter *completer;
     QAction *stayOnTop, *showCodepoints;
     QCheckBox * mUseDisplaySize;
+    qreal mUnfocusedOpacity;
 
     QSqlQueryModel * mSubstringQueryModel;
     CodepointProxy * mProxyModel;

@@ -7,12 +7,14 @@
 
 #include <QtGui>
 #include <QtSql>
+#include <QInputDialog>
 
 #include <QtDebug>
 
 MainWindow::MainWindow(QWidget *parent):
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    mUnfocusedOpacity(0.5)
 {
     ui->setupUi(this);
 
@@ -80,6 +82,8 @@ void MainWindow::readSettings()
     showCodepoints->setChecked( settings.value("showCodepoints",false).toBool() );
     mUseDisplaySize->setChecked( settings.value("useDisplaySize",false).toBool() );
 
+    mUnfocusedOpacity = settings.value("unfocusedOpacity", 0.5).toReal();
+
     QFont f;
     f.fromString( settings.value("font").toString() );
     setDisplayFont(f);
@@ -104,6 +108,10 @@ void MainWindow::setupOptionsMenu()
     showCodepoints->setChecked(true);
     optionsMenu->addAction(showCodepoints);
     connect(showCodepoints,SIGNAL(toggled(bool)), this, SLOT(setShowCodepoints(bool)) );
+
+    QAction * opacityAction = new QAction("Set opacity level...",optionsMenu);
+    optionsMenu->addAction(opacityAction);
+    connect( opacityAction, SIGNAL(triggered()), this, SLOT(setOpacityLevel()));
 }
 
 void MainWindow::setDisplayFont(const QFont &font)
@@ -317,6 +325,16 @@ void MainWindow::setShowCodepoints(bool show)
     setFixedHeight(sizeHint().height());
 }
 
+void MainWindow::setOpacityLevel()
+{
+    bool ok;
+    double opacity = QInputDialog::getDouble(this, tr("Set Opacity"), tr("Set the opacity level for when the window is unfocused. If you don't want the window to be transparent at all, set it to 1."), mUnfocusedOpacity, 0.0, 1.0, 2, &ok);
+    if( ok )
+    {
+        mUnfocusedOpacity = opacity;
+    }
+}
+
 void MainWindow::changeSort(int logicalIndex, Qt::SortOrder order)
 {
     mSubstringQueryModel->sort(logicalIndex, order);
@@ -345,6 +363,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings.setValue("showCodepoints", ui->characterWidget->isVisible() );
     settings.setValue("font", ui->textEntry->font().toString() );
     settings.setValue("useDisplaySize", mUseDisplaySize->checkState() == Qt::Checked );
+    settings.setValue("unfocusedOpacity", mUnfocusedOpacity);
+
     QMainWindow::closeEvent(event);
 }
 
@@ -361,5 +381,22 @@ void MainWindow::wheelEvent(QWheelEvent *event)
     }
     ui->textEntry->setFont( font );
     adjustSize();
+}
+
+void MainWindow::changeEvent(QEvent *event)
+{
+    /// https://stackoverflow.com/a/29059371/1447002
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::ActivationChange)
+    {
+        if(this->isActiveWindow())
+        {
+            setWindowOpacity(1);
+        }
+        else
+        {
+            setWindowOpacity(mUnfocusedOpacity);
+        }
+    }
 }
 
